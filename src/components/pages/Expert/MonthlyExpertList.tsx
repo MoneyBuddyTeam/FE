@@ -33,7 +33,7 @@ export default function MonthlyExpertList(): JSX.Element {
 
       <div className="flex flex-col gap-2 px-4">
         {experts.map(item => (
-          <ExpertCard key={item.id} expert={item} />
+          <ExpertCard key={item.id} expert={item} variant="monthly" />
         ))}
       </div>
       <ScrollContainer></ScrollContainer>
