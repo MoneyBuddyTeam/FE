@@ -26,7 +26,6 @@ import ReservationListPage from '../pages/Reservation/ReservationListPage';
 import ReservationDetailPage from '../pages/Reservation/ReservationDetailPage';
 import ConsultationHistoryPage from '../pages/Consultation/ConsultationHistoryPage';
 import ConsultationDetailPage from '../pages/Consultation/ConsultationDetailPage';
-import ConsultationChatPage from '../pages/Consultation/ConsultationChatPage';
 import BookmarkedExpertsPage from '../pages/Bookmarks/BookmarkedExpertsPage';
 import ChallengeStatusPage from '../pages/Challenge/ChallengeStatusPage';
 import ChallengeDetailPage from '../pages/Challenge/ChallengeDetailPage';
@@ -269,14 +268,6 @@ export default function Router() {
           </PrivateRoute>
         }
       />{' '}
-      <Route
-        path="/consultation/chat/:id"
-        element={
-          <PrivateRoute>
-            <ConsultationChatPage />
-          </PrivateRoute>
-        }
-      />
       <Route
         path="/withdraw"
         element={
