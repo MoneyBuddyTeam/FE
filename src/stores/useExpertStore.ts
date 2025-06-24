@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { MonthlyExpert } from '../types/api/expert/expert';
-import { getMonthlyExperts } from '../services/expert/expertApi';
+import { getMonthlyExperts } from '../services';
 
 interface ExpertState {
   experts: MonthlyExpert[];

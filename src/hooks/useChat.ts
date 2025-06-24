@@ -1,55 +1,23 @@
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQueryClient,
-} from '@tanstack/react-query';
-import {
-  fetchMessages,
-  sendTextMessage,
-  sendImageMessage,
-  markAsRead,
-} from '../services/chat/chatApi';
+import { useInfiniteQuery, useMutation } from '@tanstack/react-query';
+import { fetchMessages, markAsRead } from '../services/chat/chatApi';
 
-export const useChatMessages = (roomId: number | string) => {
+// ✅ 채팅 메시지 무한스크롤 로딩
+export const useChatMessages = (roomId: number) => {
   return useInfiniteQuery({
     queryKey: ['chatMessages', roomId],
     queryFn: ({ pageParam = 0 }) => fetchMessages(roomId, pageParam),
     initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => {
-      return lastPage.last ? undefined : allPages.length;
+    getNextPageParam: lastPage => {
+      return lastPage.last ? undefined : lastPage.messages.length;
     },
     refetchOnWindowFocus: false,
   });
 };
 
-export const useSendTextMessage = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: sendTextMessage,
-    onSuccess: (_, { roomId }) => {
-      queryClient.invalidateQueries({ queryKey: ['chatMessages', roomId] });
-    },
-  });
-};
-
-export const useSendImageMessage = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: sendImageMessage,
-    onSuccess: (_, { roomId }) => {
-      queryClient.invalidateQueries({ queryKey: ['chatMessages', roomId] });
-    },
-  });
-};
-
+// ✅ 메시지 읽음 처리 Hook
 export const useMarkMessageAsRead = () => {
   return useMutation({
-    mutationFn: ({
-      roomId,
-      messageId,
-    }: {
-      roomId: number | string;
-      messageId: number;
-    }) => markAsRead({ roomId: String(roomId), messageId }),
+    mutationFn: ({ messageId }: { messageId: number }) =>
+      markAsRead({ messageId }),
   });
 };

@@ -86,6 +86,16 @@ export const API_ENDPOINTS = {
   challengeParticipationDetail: (id: number) =>
     `/api/v1/challenge-participations/${id}`,
 
+  // 채팅 기능 (Chat)
+  chatRooms: '/api/v1/chat-rooms',
+  chatRoomDetail: (roomId: number) => `/api/v1/chat-rooms/${roomId}`,
+  chatRoomsByUser: (userId: number) => `/api/v1/users/${userId}/chat-rooms`,
+  chatRoomsByAdvisor: (advisorId: number) =>
+    `/api/v1/advisors/${advisorId}/chat-rooms`,
+  chatMessages: (roomId: number) => `/api/v1/chat-rooms/${roomId}/messages`,
+  markMessageAsRead: (messageId: number) =>
+    `/api/v1/messages/${messageId}/read`,
+
   // 미션 기능 (Mission)
   createMission: (participationId: number) =>
     `/api/v1/admin/challenge-participations/${participationId}/missions`,
@@ -123,7 +133,6 @@ export const API_ENDPOINTS = {
   webhookDetail: (id: number) => `/api/v1/admin/webhooks/${id}`,
 
   // 프로젝트 전용 기능
-  getMonthlyExperts: '/api/v1/experts/monthly',
   bookmarks: '/api/v1/bookmarks',
   bookmarkToggle: (advisorId: number) =>
     `/api/v1/bookmarks/toggle/${advisorId}`,
