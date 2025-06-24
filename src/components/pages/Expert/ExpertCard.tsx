@@ -1,9 +1,9 @@
-import type { JSX } from 'react';
-import Button from '../../common/Button';
+import { Star } from 'lucide-react';
 import type { MonthlyExpert } from '../../../types/api/expert/expert';
 import HeartIcon from '../../../assets/icons/common/heart.png';
 import HeartEmptyIcon from '../../../assets/icons/common/heartEmpty.png';
 import { useExpertStore } from '../../../stores/useExpertStore';
+import type { JSX } from 'react';
 
 interface ExpertCardProps {
   expert: MonthlyExpert;
@@ -32,48 +32,47 @@ export default function ExpertCard({ expert }: ExpertCardProps): JSX.Element {
   const rankColor = rankColors[rank] ?? 'bg-gray-300';
 
   return (
-    <div className="flex justify-between items-start p-3 border rounded-xl bg-white">
-      <div className="flex gap-3">
-        <div className="relative w-12 h-12">
-          <img
-            src={imgUrl}
-            alt={`${name}의 프로필`}
-            className="w-12 h-12 rounded-full object-cover"
-          />
-
-          <div
-            className={`absolute -top-2 -left-2 w-6 h-6 flex items-center justify-center rounded-full text-white text-xs font-bold ${rankColor}`}
-          >
-            {rank}
-          </div>
-        </div>
-        <div>
-          <div className="flex gap-2 items-center">
-            <p className="text-b1 font-semibold">{name}</p>
-            <div className="flex gap-1 text-xs text-gray-500">
-              {tags.map(tag => (
-                <p key={tag}>#{tag}</p>
-              ))}
-            </div>
-          </div>
-          <p className="text-sm text-gray-800">{description}</p>
-          <div className="text-xs mt-1 flex gap-1">
-            <p className="font-semibold">⭐ {rating.toFixed(1)}</p>
-            <p>({reviewCount})</p>
-          </div>
+    <div className="relative flex items-start p-3 border rounded-xl bg-white h-[120px]">
+      <div className="relative mr-3 mt-2 shrink-0">
+        <img
+          src={imgUrl}
+          alt={`${name}의 프로필`}
+          className="w-14 h-14 rounded-full object-cover"
+        />
+        <div
+          className={`absolute -top-2 -left-2 w-6 h-6 flex items-center justify-center rounded-full text-white text-xs font-bold ${rankColor}`}
+        >
+          {rank}
         </div>
       </div>
-      <Button
-        variant="text"
+
+      <div className="flex-1 pr-8 overflow-hidden">
+        <p className="text-b1 font-semibold truncate">{name}</p>
+        <div className="flex flex-wrap gap-[4px] text-xs text-gray-500 mb-1">
+          {tags.map(tag => (
+            <span key={tag}>#{tag}</span>
+          ))}
+        </div>
+        <p className="text-sm text-gray-800 break-words line-clamp-2">
+          {description}
+        </p>
+        <div className="text-xs mt-1 flex items-center gap-1 text-pink-500 font-semibold">
+          <Star className="w-4 h-4 fill-pink-500 stroke-pink-500" />
+          <span>{rating.toFixed(1)}</span>
+          <span className="text-gray-500 font-normal">({reviewCount})</span>
+        </div>
+      </div>
+
+      <button
         onClick={() => toggleLike(id)}
-        className="w-fit h-fit p-1"
+        className="absolute right-3 top-1/2 -translate-y-1/2"
       >
         <img
           src={isLiked ? HeartIcon : HeartEmptyIcon}
           alt="하트 아이콘"
           className="w-5 h-5"
         />
-      </Button>
+      </button>
     </div>
   );
 }
