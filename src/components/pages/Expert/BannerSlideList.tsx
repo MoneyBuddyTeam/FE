@@ -1,23 +1,22 @@
 import ScrollContainer from 'react-indiana-drag-scroll';
-import { contents } from '../../../data/contentData';
+import { banners } from '../../../data/contentData';
 
-export default function RecommendCard() {
+export default function BannerSlideList() {
   return (
-    <div className="my-8 px-4">
-      <h2 className="text-h2 my-2 px-4">오늘의 맞춤 콘텐츠</h2>
+    <div className="my-6 px-4">
       <ScrollContainer
         className="flex gap-3 overflow-x-auto hide-scrollbar"
         horizontal
       >
-        {contents.map(item => (
+        {banners.map(item => (
           <div
             key={item.id}
-            className="min-w-[335px] h-[335px] mx-2 rounded-xl overflow-hidden relative shrink-0"
+            className="min-w-[300px] h-[190px] mx-1 rounded-xl overflow-hidden relative shrink-0 flex items-center justify-center bg-gray-100"
           >
             <img
               src={item.imageUrl}
               alt={item.title}
-              className="w-full h-full object-cover"
+              className="h-full w-full object-contain"
             />
           </div>
         ))}

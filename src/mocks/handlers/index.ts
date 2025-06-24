@@ -10,6 +10,7 @@ import { paymentHandlers as paymentHandlersFromFile } from './payment/paymentHan
 import { withdrawHandlers as withdrawHandlersFromFile } from './withdrawHandlers';
 import { expertData } from '../../data/expertData';
 import { chatHandlers } from './chat/chatHandler';
+import { searchHandlers } from './search/searchHandler';
 
 const bookmarkHandler = http.post(
   '/api/v1/advisors/:advisorId/bookmark',
@@ -349,6 +350,7 @@ export const handlers = [
   ...withdrawHandlersFromFile,
   ...defaultHandlers,
   ...chatHandlers,
+  ...searchHandlers,
   bookmarkHandler,
   ...additionalBookmarkHandlers,
   withdrawHandler,
