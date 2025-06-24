@@ -36,7 +36,6 @@ export default function MonthlyExpertList(): JSX.Element {
           <ExpertCard key={item.id} expert={item} variant="monthly" />
         ))}
       </div>
-      <ScrollContainer></ScrollContainer>
     </div>
   );
 }
