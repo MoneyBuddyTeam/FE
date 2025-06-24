@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 interface Expert {
   id: number;
   name: string;
-  tags: string[];
+  tags?: string[]; // tags를 optional로 변경
   description: string;
   profileImage: string;
   rank?: number;
@@ -32,7 +32,7 @@ export default function ExpertCard({
     id,
     rank,
     name,
-    tags,
+    tags = [], // 기본값 설정
     description,
     rating = 0,
     reviewCount = 0,

@@ -28,10 +28,9 @@ export default function MonthlyExpertList(): JSX.Element {
       </div>
       <p className="text-b2 text-[#9C9C9C] px-4 mt-1 mb-3">
         {displayMonth} 가장 상담율이 높은 엑스퍼트 5명을 선정했어요.
-      </p>
-
+      </p>{' '}
       <div className="flex flex-col gap-2 px-4">
-        {experts.map(item => (
+        {experts?.map(item => (
           <ExpertCard key={item.id} expert={item} variant="monthly" />
         ))}
       </div>

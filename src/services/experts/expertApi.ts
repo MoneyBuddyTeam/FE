@@ -12,12 +12,44 @@ import type {
   CreateChallengeResponse,
 } from '../../types/auth';
 
-// 월간 전문가 조회 (프로젝트 전용 - 명세서에 없음)
-export const getMonthlyExperts = async (): Promise<MonthlyExpert[]> => {
+interface ExpertResponse {
+  content: MonthlyExpert[];
+  pageable: {
+    pageNumber: number;
+    pageSize: number;
+  };
+  totalPages: number;
+  totalElements: number;
+}
+
+// 월간 전문가 조회
+export const getMonthlyExperts = async (
+  page: number = 0,
+  size: number = 20,
+): Promise<ExpertResponse> => {
   const response = await axiosInstance.get(API_ENDPOINTS.advisors, {
-    params: { sort: 'monthly', limit: 5 },
+    params: { sort: 'monthly', page, size },
   });
-  return response.data;
+
+  // API 응답이 이미 ExpertResponse 형식인 경우 그대로 반환
+  if (response.data.content && response.data.pageable) {
+    return response.data;
+  }
+
+  // API 응답이 배열인 경우 ExpertResponse 형식으로 변환
+  const experts = Array.isArray(response.data)
+    ? response.data
+    : response.data.advisors || [];
+
+  return {
+    content: experts,
+    pageable: {
+      pageNumber: page,
+      pageSize: size,
+    },
+    totalPages: Math.ceil(experts.length / size),
+    totalElements: experts.length,
+  };
 };
 
 // 전문가 목록 조회 (명세서: GET /api/v1/advisors)
@@ -28,11 +60,12 @@ export const getExperts = async (
   const response = await axiosInstance.get(API_ENDPOINTS.advisors, { params });
   console.log('✅ API 응답: 전문가 목록 조회 성공');
   return {
-    experts: response.data.advisors || response.data.experts || [],
-    total: response.data.total || 0,
-    page: response.data.page || 1,
-    limit: response.data.limit || 10,
-    hasMore: response.data.hasMore || false,
+    experts: response.data.content || response.data.experts || [],
+    total: response.data.totalElements || response.data.total || 0,
+    page: response.data.pageable?.pageNumber || response.data.page || 1,
+    limit: response.data.pageable?.pageSize || response.data.limit || 10,
+    hasMore:
+      (response.data.pageable?.pageNumber || 0) < response.data.totalPages - 1,
   };
 };
 
