@@ -49,11 +49,12 @@ export interface ConsultationMessage {
 }
 
 export interface ChatMessage {
-  chatRoomId: number;
+  consultationRoomId: number;
   senderId: number;
   senderNickname: string;
+  type: 'TEXT' | 'IMAGE';
   message: string;
-  type: string;
   imageUrl?: string;
-  sentAt: string;
+  replyTo?: number | null;
+  sentAt?: string;
 }
