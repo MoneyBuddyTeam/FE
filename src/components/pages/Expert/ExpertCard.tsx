@@ -21,7 +21,7 @@ interface Expert {
 
 interface ExpertCardProps {
   expert: MonthlyExpert | Expert;
-  variant?: 'monthly' | 'search'; // 기본값은 'monthly'
+  variant?: 'monthly' | 'search';
 }
 
 export default function ExpertCard({
