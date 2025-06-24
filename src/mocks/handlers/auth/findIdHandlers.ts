@@ -10,30 +10,35 @@ const MOCK_USER_DATA = {
 
 export const findIdHandlers = [
   http.post('/api/v1/auth/find-id', async ({ request }) => {
-    const body = (await request.json()) as FindIdRequest;
-    console.log('Request body:', body); // 디버깅용 로그
+    try {
+      const body = (await request.json()) as FindIdRequest;
+      console.log('🔍 아이디 찾기 요청:', body);
 
-    // 정확한 경로와 데이터 비교
-    if (
-      body.name === MOCK_USER_DATA.name &&
-      body.phone === MOCK_USER_DATA.phone
-    ) {
-      const response: FindIdResponse = {
-        email: MOCK_USER_DATA.email,
-        joinDate: MOCK_USER_DATA.joinDate,
-      };
-      return HttpResponse.json(response, { status: 200 });
+      // 정확한 경로와 데이터 비교
+      if (
+        body.name === MOCK_USER_DATA.name &&
+        body.phone === MOCK_USER_DATA.phone
+      ) {
+        console.log('✅ 사용자 정보 일치');
+        const response: FindIdResponse = {
+          email: MOCK_USER_DATA.email,
+          joinDate: MOCK_USER_DATA.joinDate,
+        };
+        console.log('📨 응답 데이터:', response);
+        return HttpResponse.json(response);
+      }
+
+      console.log('❌ 일치하는 사용자 없음');
+      return HttpResponse.json(
+        { message: '일치하는 회원이 없습니다.' },
+        { status: 404 },
+      );
+    } catch (error) {
+      console.error('❌ 아이디 찾기 처리 중 오류:', error);
+      return HttpResponse.json(
+        { message: '서버 오류가 발생했습니다.' },
+        { status: 500 },
+      );
     }
-
-    // 일치하지 않는 경우의 응답
-    return new HttpResponse(
-      JSON.stringify({ message: '일치하는 회원이 없습니다.' }),
-      {
-        status: 404,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      },
-    );
   }),
 ];

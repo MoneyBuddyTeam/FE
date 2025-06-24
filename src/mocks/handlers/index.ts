@@ -3,6 +3,7 @@ import { authHandlers } from './auth';
 import { findIdHandlers } from './auth/findIdHandlers';
 import { resetPasswordHandlers } from './auth/resetPasswordHandlers';
 import { authPasswordHandlers } from './auth/authPasswordHandlers';
+import { socialLoginHandlers } from './auth/socialLoginHandlers';
 import { userInfoHandlers } from './user/userInfoHandlers';
 import { experthandlers } from './expert/expertHandlers';
 import { advisorHandlers } from './advisor/advisorHandlers';
@@ -11,6 +12,24 @@ import { withdrawHandlers as withdrawHandlersFromFile } from './withdrawHandlers
 import { expertData } from '../../data/expertData';
 import { chatHandlers } from './chat/chatHandler';
 import { searchHandlers } from './search/searchHandler';
+import { bookmarkHandlers } from './bookmarks/bookmarkHandlers';
+
+// 사용자 정보 조회 핸들러
+const userHandler = http.get('/api/v1/users/me', ({ request }) => {
+  const authHeader = request.headers.get('Authorization');
+
+  // 토큰이 있으면 성공 응답
+  if (authHeader) {
+    return HttpResponse.json({
+      id: 1,
+      nickname: 'loginUser',
+      email: 'user@login.com',
+      role: 'USER',
+    });
+  }
+
+  return HttpResponse.json({ message: '인증이 필요합니다.' }, { status: 401 });
+});
 
 const bookmarkHandler = http.post(
   '/api/v1/advisors/:advisorId/bookmark',
@@ -339,21 +358,39 @@ export const defaultHandlers = [
 
 // 모든 핸들러들을 하나로 통합하여 export
 export const handlers = [
+  // 사용자 정보 조회
+  http.get('/api/v1/users/me', ({ request }) => {
+    const authHeader = request.headers.get('Authorization');
+
+    // 토큰이 있으면 성공 응답
+    if (authHeader) {
+      return HttpResponse.json({
+        id: 1,
+        nickname: 'loginUser',
+        email: 'user@login.com',
+        role: 'USER',
+      });
+    }
+
+    return HttpResponse.json(
+      { message: '인증이 필요합니다.' },
+      { status: 401 },
+    );
+  }),
+  ...defaultHandlers,
   ...authHandlers,
   ...findIdHandlers,
   ...resetPasswordHandlers,
   ...authPasswordHandlers,
+  ...socialLoginHandlers,
   ...userInfoHandlers,
   ...experthandlers,
   ...advisorHandlers,
   ...paymentHandlersFromFile,
   ...withdrawHandlersFromFile,
-  ...defaultHandlers,
   ...chatHandlers,
   ...searchHandlers,
-  bookmarkHandler,
-  ...additionalBookmarkHandlers,
-  withdrawHandler,
+  ...bookmarkHandlers,
 ];
 
 export const otherHandlers = [
