@@ -22,8 +22,20 @@ const getMonthlyExpertsFromData = (): MonthlyExpert[] => {
 };
 
 export const experthandlers = [
-  http.get(API_ENDPOINTS.getMonthlyExperts, () => {
-    console.log('🎯 MSW: expertHandlers에서 월간 전문가 데이터 반환');
-    return HttpResponse.json(getMonthlyExpertsFromData());
-  }),
+  http.get(
+    new URL(API_ENDPOINTS.advisors, window.location.origin).toString(),
+    ({ request }) => {
+      const url = new URL(request.url);
+      const sort = url.searchParams.get('sort');
+
+      // 월간 전문가 요청인 경우
+      if (sort === 'monthly') {
+        console.log('🎯 MSW: expertHandlers에서 월간 전문가 데이터 반환');
+        return HttpResponse.json(getMonthlyExpertsFromData());
+      }
+
+      // 일반 전문가 목록 요청은 advisorHandlers에서 처리되도록 pass
+      return new Response(null, { status: 404 });
+    },
+  ),
 ];

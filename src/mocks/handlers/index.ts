@@ -5,7 +5,6 @@ import { resetPasswordHandlers } from './auth/resetPasswordHandlers';
 import { authPasswordHandlers } from './auth/authPasswordHandlers';
 import { socialLoginHandlers } from './auth/socialLoginHandlers';
 import { userInfoHandlers } from './user/userInfoHandlers';
-import { experthandlers } from './expert/expertHandlers';
 import { advisorHandlers } from './advisor/advisorHandlers';
 import { paymentHandlers as paymentHandlersFromFile } from './payment/paymentHandlers';
 import { withdrawHandlers as withdrawHandlersFromFile } from './withdrawHandlers';
@@ -384,8 +383,7 @@ export const handlers = [
   ...authPasswordHandlers,
   ...socialLoginHandlers,
   ...userInfoHandlers,
-  ...experthandlers,
-  ...advisorHandlers,
+  ...advisorHandlers, // experthandlers는 제거하고 advisorHandlers만 사용
   ...paymentHandlersFromFile,
   ...withdrawHandlersFromFile,
   ...chatHandlers,

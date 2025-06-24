@@ -131,7 +131,6 @@ export const advisorHandlers = [
       );
     }
   }),
-
   // 전문가 상세 조회 (GET /api/v1/advisors/{advisorId})
   http.get(`${API_ENDPOINTS.advisors}/:id`, ({ params }) => {
     try {
@@ -139,7 +138,6 @@ export const advisorHandlers = [
       const expert = expertData.find(e => e.id === expertId);
 
       if (!expert) {
-        console.log(`❌ MSW: 전문가를 찾을 수 없음 - ID: ${expertId}`);
         return HttpResponse.json(
           { message: '전문가를 찾을 수 없습니다.' },
           { status: 404 },
@@ -156,7 +154,6 @@ export const advisorHandlers = [
       );
     }
   }),
-
   // 카테고리 목록 조회 (GET /api/v1/categories)
   http.get(API_ENDPOINTS.categories, () => {
     const categories = [
