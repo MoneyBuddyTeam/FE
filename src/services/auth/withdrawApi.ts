@@ -1,5 +1,4 @@
 import { axiosInstance } from '../api';
-import { API_ENDPOINTS } from '../../config/api';
 
 // 탈퇴를 위한 비밀번호 확인 API
 export const verifyPasswordForWithdraw = async (

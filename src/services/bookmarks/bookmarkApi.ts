@@ -1,5 +1,4 @@
 import { axiosInstance } from '../api';
-import { API_ENDPOINTS } from '../../config/api';
 
 // 북마크 목록 조회
 export const getBookmarksApi = async () => {

@@ -14,98 +14,8 @@ import { searchHandlers } from './search/searchHandler';
 import { bookmarkHandlers } from './bookmarks/bookmarkHandlers';
 
 // 사용자 정보 조회 핸들러
-const userHandler = http.get('/api/v1/users/me', ({ request }) => {
-  const authHeader = request.headers.get('Authorization');
-
-  // 토큰이 있으면 성공 응답
-  if (authHeader) {
-    return HttpResponse.json({
-      id: 1,
-      nickname: 'loginUser',
-      email: 'user@login.com',
-      role: 'USER',
-    });
-  }
-
-  return HttpResponse.json({ message: '인증이 필요합니다.' }, { status: 401 });
-});
-
-const bookmarkHandler = http.post(
-  '/api/v1/advisors/:advisorId/bookmark',
-  ({ params, request }) => {
-    const authHeader = request.headers.get('Authorization');
-
-    // 인증 체크
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.log('❌ 북마크: 인증되지 않은 사용자');
-      return HttpResponse.json(
-        { message: '로그인이 필요합니다.' },
-        { status: 401 },
-      );
-    }
-
-    console.log('🔖 북마크 핸들러 호출됨:', params);
-    const advisorId = Number(params.advisorId);
-    const expert = expertData.find(e => e.id === advisorId);
-
-    if (!expert) {
-      console.log('❌ 전문가를 찾을 수 없음:', advisorId);
-      return HttpResponse.json(
-        { message: '전문가를 찾을 수 없습니다.' },
-        { status: 404 },
-      );
-    }
-
-    console.log('✅ 북마크 토글 성공:', expert.nickname);
-    return HttpResponse.json({
-      bookmarked: true,
-      message: '북마크가 토글되었습니다.',
-    });
-  },
-);
 
 // 추가 북마크 핸들러들
-const additionalBookmarkHandlers = [
-  // 기존 북마크 토글 API 경로
-  http.post('/api/v1/bookmarks/:advisorId', ({ params, request }) => {
-    const authHeader = request.headers.get('Authorization');
-
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.log('❌ 북마크: 인증되지 않은 사용자');
-      return HttpResponse.json(
-        { message: '로그인이 필요합니다.' },
-        { status: 401 },
-      );
-    }
-
-    const advisorId = Number(params.advisorId);
-    console.log('🔖 기존 북마크 핸들러 호출됨:', advisorId);
-    return HttpResponse.json({
-      bookmarked: true,
-      message: '북마크가 토글되었습니다.',
-    });
-  }),
-
-  // bookmarkApi.ts에서 사용하는 토글 경로
-  http.post('/api/v1/bookmarks/toggle/:advisorId', ({ params, request }) => {
-    const authHeader = request.headers.get('Authorization');
-
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.log('❌ 북마크: 인증되지 않은 사용자');
-      return HttpResponse.json(
-        { message: '로그인이 필요합니다.' },
-        { status: 401 },
-      );
-    }
-
-    const advisorId = Number(params.advisorId);
-    console.log('🔖 토글 북마크 핸들러 호출됨:', advisorId);
-    return HttpResponse.json({
-      bookmarked: true,
-      message: '북마크가 토글되었습니다.',
-    });
-  }),
-];
 
 // 예약 관련 핸들러
 const reservationHandlers = [
@@ -323,30 +233,6 @@ const consultationHandlers = [
 // 마이페이지 관련 핸들러 추가
 
 // 회원탈퇴 핸들러
-const withdrawHandler = http.post(
-  '/api/v1/auth/withdraw',
-  async ({ request }) => {
-    const authHeader = request.headers.get('Authorization');
-
-    // 인증 체크
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return HttpResponse.json(
-        { message: '인증이 필요합니다.' },
-        { status: 401 },
-      );
-    }
-
-    const { reason } = (await request.json()) as {
-      reason: string;
-    };
-    console.log('🗑️ 회원탈퇴:', { reason });
-
-    return HttpResponse.json({
-      message: '회원탈퇴가 완료되었습니다.',
-      success: true,
-    });
-  },
-);
 
 // 기본 헬스체크 핸들러만 유지
 export const defaultHandlers = [

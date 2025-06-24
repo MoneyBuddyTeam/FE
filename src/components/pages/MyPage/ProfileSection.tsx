@@ -1,4 +1,3 @@
-import { ChevronRight } from 'lucide-react';
 import { mypageStateStyles } from '../../../styles/mypage-state.styles';
 
 interface ProfileSectionProps {
@@ -10,7 +9,6 @@ interface ProfileSectionProps {
 export default function ProfileSection({
   nickname,
   profileImage,
-  onEditClick,
 }: ProfileSectionProps) {
   return (
     <div className={mypageStateStyles.content.profileSection}>

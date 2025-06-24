@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   preparePaymentApi,
-  approvePaymentApi,
   getPaymentHistoryApi,
   getPaymentStatusApi,
   cancelPaymentApi,

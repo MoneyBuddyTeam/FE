@@ -16,8 +16,7 @@ const validateToken = (authHeader: string | null): boolean => {
 };
 
 // 토큰에서 사용자 ID 추출
-const getUserIdFromToken = (authHeader: string): number => {
-  const token = authHeader.replace('Bearer ', '');
+const getUserIdFromToken = (): number => {
   // 토큰에서 숫자 추출 (예: mock_login_access_token_1750768887356에서 1을 추출)
   return 1; // 테스트를 위해 기본값 1 반환
 };
@@ -151,7 +150,7 @@ export const userInfoHandlers = [
       );
     }
 
-    const userId = getUserIdFromToken(authHeader!);
+    const userId = getUserIdFromToken();
     console.log('✅ MSW: 포인트 조회 성공 - ID:', userId);
 
     return HttpResponse.json({
