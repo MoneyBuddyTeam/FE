@@ -1,9 +1,9 @@
-// src/services/connectChatSocket.ts
+// WebSocket 연결 및 수신 처리
 import { Stomp, CompatClient, type IMessage } from '@stomp/stompjs';
 import type { ChatMessage } from '../../types';
 import { parseMessageFrame } from './chatUtils';
 
-export let stompClient: CompatClient | null = null; // 여기서 export!
+export let stompClient: CompatClient | null = null;
 
 export const connectChatSocket = ({
   roomId,
@@ -15,13 +15,10 @@ export const connectChatSocket = ({
   onConnectChange: (
     status: 'CONNECTED' | 'DISCONNECTED' | 'RECONNECTING',
   ) => void;
-  onDisconnectForced?: () => void;
-  onReconnectSuccess?: () => void;
 }) => {
   const client = Stomp.over(
     () => new WebSocket('ws://localhost:8080/ws-stomp'),
   );
-
   stompClient = client;
 
   client.connect(
