@@ -1,16 +1,17 @@
 import { http, HttpResponse } from 'msw';
+import type { PaymentRequest } from '../../../services/payment/paymentApi';
 
 export const paymentHandlers = [
-  // 결제 처리 API
-  http.post('/api/v1/payments', async ({ request }) => {
-    const paymentData = (await request.json()) as any;
-    console.log('💳 결제 처리 요청:', paymentData);
-
+  // 결제 준비 API
+  http.post('/api/v1/payments/prepare', async ({ request }) => {
+    const paymentData = await request.json();
+    console.log('💳 결제 준비 요청:', paymentData);
     return HttpResponse.json({
       payment_id: 'pay_' + Date.now(),
-      status: 'completed',
-      amount: paymentData?.amount || 50000,
-      message: '결제가 성공적으로 처리되었습니다.',
+      status: 'pending',
+      amount: (paymentData as PaymentRequest).amount,
+      message: '결제가 준비되었습니다.',
+      redirect_url: 'https://pg.example.com/payment',
     });
   }),
 
@@ -40,9 +41,8 @@ export const paymentHandlers = [
       total_count: 2,
     });
   }),
-
   // 결제 상태 조회 API
-  http.get('/api/v1/payments/:paymentId', ({ params }) => {
+  http.get('/api/v1/payments/:paymentId/status', ({ params }) => {
     const { paymentId } = params;
     console.log('🔍 결제 상태 조회:', paymentId);
 

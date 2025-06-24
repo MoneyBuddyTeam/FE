@@ -110,8 +110,10 @@ export const authPasswordHandlers = [
   // 비밀번호 확인 API (명세서: POST /api/v1/auth/verify-password)
   http.post('/api/v1/auth/verify-password', async ({ request }) => {
     try {
-      const data = (await request.json()) as any;
+      const data = (await request.json()) as { password: string };
       const authHeader = request.headers.get('Authorization');
+
+      console.log('🔐 MSW: 비밀번호 확인:', { password: '***' });
 
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return HttpResponse.json(
@@ -120,19 +122,19 @@ export const authPasswordHandlers = [
         );
       }
 
-      console.log('🔐 MSW: 비밀번호 확인:', data);
-
-      // 테스트용: 'password123' 허용
-      if (data.password === 'password123') {
-        return HttpResponse.json({
-          verified: true,
-          message: '비밀번호가 확인되었습니다.',
-        });
+      // 비밀번호 검증 로직 (테스트용 비밀번호: 'password123!')
+      if (data.password !== 'password123!') {
+        console.log('❌ MSW: 비밀번호 검증 실패');
+        return HttpResponse.json(
+          { message: '비밀번호가 일치하지 않습니다.' },
+          { status: 400 },
+        );
       }
 
+      console.log('✅ MSW: 비밀번호 검증 성공');
       return HttpResponse.json(
-        { message: '비밀번호가 일치하지 않습니다.' },
-        { status: 400 },
+        { message: '비밀번호가 확인되었습니다.' },
+        { status: 200 },
       );
     } catch (error) {
       console.error('❌ MSW - 비밀번호 확인 오류:', error);
