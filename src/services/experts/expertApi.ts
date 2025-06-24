@@ -7,6 +7,10 @@ import type {
 } from '../../types/expert';
 import type { MonthlyExpert } from '../../types/api/expert/expert';
 import type { CategoryResponse } from '../../types/expert';
+import type {
+  CreateChallengeRequest,
+  CreateChallengeResponse,
+} from '../../types/auth';
 
 // 월간 전문가 조회 (프로젝트 전용 - 명세서에 없음)
 export const getMonthlyExperts = async (): Promise<MonthlyExpert[]> => {
@@ -44,7 +48,7 @@ export const getCategories = async (): Promise<CategoryResponse[]> => {
   return response.data;
 };
 
-// 북마크 목록 조회 (명세서에 없음 - 프로젝트 전용)
+// 북마크 목록 조회
 export const getBookmarks = async (): Promise<Expert[]> => {
   console.log('🔖 API 호출: 북마크 목록 조회');
   const response = await axiosInstance.get(API_ENDPOINTS.bookmarks);
@@ -52,7 +56,7 @@ export const getBookmarks = async (): Promise<Expert[]> => {
   return response.data;
 };
 
-// 북마크 토글 (명세서에 없음 - 프로젝트 전용)
+// 북마크 토글
 export const toggleBookmark = async (
   expertId: number,
 ): Promise<{
@@ -67,7 +71,7 @@ export const toggleBookmark = async (
   return response.data;
 };
 
-// 상담 관련 API 함수들 (명세서에 따라 수정)
+// 상담 관련 API 함수
 export const getConsultations = async () => {
   console.log('💬 API 호출: 상담 내역 조회');
   const response = await axiosInstance.get(API_ENDPOINTS.consultations);
@@ -98,6 +102,19 @@ export const getChallenges = async () => {
   console.log('🏆 API 호출: 챌린지 목록 조회');
   const response = await axiosInstance.get(API_ENDPOINTS.challenges);
   console.log('✅ API 응답: 챌린지 목록 조회 성공');
+  return response.data;
+};
+
+// 챌린지 생성 - 명세서 준수 (POST /api/v1/challenges)
+export const createChallenge = async (
+  challengeData: CreateChallengeRequest,
+): Promise<CreateChallengeResponse> => {
+  console.log('🏆 API 호출: 챌린지 생성 (관리자/전문가)');
+  const response = await axiosInstance.post(
+    API_ENDPOINTS.challenges,
+    challengeData,
+  );
+  console.log('✅ API 응답: 챌린지 생성 성공');
   return response.data;
 };
 
@@ -146,7 +163,7 @@ export const getConsultationMessages = async (
   return response.data;
 };
 
-// 인증 필요 API 함수들 (명세서 준수)
+// 인증 필요 API 함수
 export const getUserChallengeParticipations = async (userId: number) => {
   console.log(`🏆 API 호출: 사용자 챌린지 참여 내역 조회 - User ID: ${userId}`);
   const response = await axiosInstance.get(
@@ -182,51 +199,23 @@ export const registerAdvisor = async (advisorData: {
   isOnline: boolean;
 }) => {
   console.log('👨‍🏫 API 호출: 전문가 등록');
-  const response = await axiosInstance.post('/api/v1/advisors', advisorData);
+  const response = await axiosInstance.post(
+    API_ENDPOINTS.advisors,
+    advisorData,
+  );
   console.log('✅ API 응답: 전문가 등록 성공');
   return response.data;
 };
 
-// 사용자 ID로 전문가 조회 (명세서: GET /api/v1/advisors/user/{userId})
-export const getAdvisorByUserId = async (userId: number) => {
-  console.log(`👨‍🏫 API 호출: 사용자 ID로 전문가 조회 - User ID: ${userId}`);
-  const response = await axiosInstance.get(`/api/v1/advisors/user/${userId}`);
-  console.log('✅ API 응답: 사용자 ID로 전문가 조회 성공');
-  return response.data;
-};
-
-// 전문가 온라인 상태 업데이트 (명세서: PUT /api/v1/advisors/{advisorId}/online-status)
-export const updateAdvisorOnlineStatus = async (
-  advisorId: number,
-  isOnline: boolean,
-) => {
-  console.log(`🟢 API 호출: 전문가 온라인 상태 업데이트 - ID: ${advisorId}`);
-  const response = await axiosInstance.put(
-    `/api/v1/advisors/${advisorId}/online-status?isOnline=${isOnline}`,
+// 챌린지 생성 API - (POST /api/v1/challenges)
+export const createChallengeAdmin = async (
+  challengeData: CreateChallengeRequest,
+): Promise<CreateChallengeResponse> => {
+  console.log('🏆 API 호출: 챌린지 생성 (관리자/전문가)');
+  const response = await axiosInstance.post(
+    API_ENDPOINTS.challenges,
+    challengeData,
   );
-  console.log('✅ API 응답: 전문가 온라인 상태 업데이트 성공');
-  return response.data;
-};
-
-// 전문가 상담 가능 여부 업데이트 (명세서: PUT /api/v1/advisors/{advisorId}/availability)
-export const updateAdvisorAvailability = async (
-  advisorId: number,
-  available: boolean,
-) => {
-  console.log(`📅 API 호출: 전문가 상담 가능 여부 업데이트 - ID: ${advisorId}`);
-  const response = await axiosInstance.put(
-    `/api/v1/advisors/${advisorId}/availability?available=${available}`,
-  );
-  console.log('✅ API 응답: 전문가 상담 가능 여부 업데이트 성공');
-  return response.data;
-};
-
-// 전문가 등록 여부 확인 (명세서: GET /api/v1/advisors/exists/user/{userId})
-export const checkAdvisorExists = async (userId: number) => {
-  console.log(`🔍 API 호출: 전문가 등록 여부 확인 - User ID: ${userId}`);
-  const response = await axiosInstance.get(
-    `/api/v1/advisors/exists/user/${userId}`,
-  );
-  console.log('✅ API 응답: 전문가 등록 여부 확인 성공');
+  console.log('✅ API 응답: 챌린지 생성 성공');
   return response.data;
 };

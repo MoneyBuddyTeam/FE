@@ -19,7 +19,7 @@ const validateToken = (authHeader: string | null): boolean => {
 const getUserIdFromToken = (authHeader: string): number => {
   const token = authHeader.replace('Bearer ', '');
   const match = token.match(/mock_access_token_(\d+)_/);
-  return match ? parseInt(match[1]) : 1; // 기본값 1
+  return match ? parseInt(match[1]) : 1;
 };
 
 export const userInfoHandlers = [
@@ -127,90 +127,38 @@ export const userInfoHandlers = [
     });
   }),
 
-  // 사용자 설정 조회 (명세서 준수)
-  http.get('/api/v1/users/:userId/settings', ({ params }) => {
-    const { userId } = params;
-    console.log('⚙️ 사용자 설정 조회:', userId);
+  // 공개 프로필 조회 (GET /api/v1/users/{id}/profile)
+  http.get('/api/v1/users/:id/profile', ({ params }) => {
+    const userId = Number(params.id);
+    console.log(`👤 MSW: 공개 프로필 조회 - User ID: ${userId}`);
 
-    return HttpResponse.json({
-      user_id: parseInt(userId as string),
-      notification_settings: {
-        push_enabled: true,
-        email_enabled: true,
-        sms_enabled: false,
-      },
-      privacy_settings: {
-        profile_public: true,
-        activity_public: false,
-      },
-      consultation_settings: {
-        auto_accept: false,
-        preferred_time: '14:00-18:00',
-      },
-    });
+    const mockProfile = {
+      userId: userId,
+      nickname: `사용자${userId}`,
+      profileImage: `/jpg/experts/expert${(userId % 5) + 1}.png`,
+    };
+
+    console.log('✅ MSW: 공개 프로필 조회 성공');
+    return HttpResponse.json(mockProfile);
   }),
 
-  // 사용자 설정 수정 (명세서 준수)
-  http.put('/api/v1/users/:userId/settings', async ({ params, request }) => {
-    const { userId } = params;
-    const settings = await request.json();
-    console.log('⚙️ 사용자 설정 수정:', userId, settings);
+  // 탈퇴 계정 복구 (POST /api/v1/users/recover)
+  http.post('/api/v1/users/recover', async ({ request }) => {
+    const { email } = (await request.json()) as { email: string };
+    console.log(`🔄 MSW: 탈퇴 계정 복구 시도 - Email: ${email}`);
 
-    return HttpResponse.json({
-      message: '설정이 성공적으로 업데이트되었습니다.',
-      updated_at: new Date().toISOString(),
-    });
-  }),
+    // 실제로는 탈퇴 후 30일 이내 계정 확인
+    const recoveredUser = {
+      id: 999,
+      email: email,
+      nickname: '복구된사용자',
+      phone: '010-1234-5678',
+      profileImage: '/jpg/experts/expert1.png',
+      role: 'USER',
+      loginMethod: 'EMAIL',
+    };
 
-  // 사용자 정보 조회 (ID로)
-  http.get('/api/v1/users/:id', ({ params }) => {
-    const id = Number(params.id);
-    return HttpResponse.json({ ...mockUser, id });
-  }),
-  // 사용자 삭제 (탈퇴) - 명세서 준수 (DELETE /api/v1/users/{id})
-  http.delete('/api/v1/users/:id', async ({ params }) => {
-    const { id } = params;
-    console.log('👋 MSW: 사용자 탈퇴', { id });
-
-    // 명세서에 따라 204 No Content 반환
-    return new HttpResponse(null, { status: 204 });
-  }),
-
-  // 결제 내역 조회 (명세서에 없음 - 프로젝트 필요)
-  http.get('/api/v1/payments', ({ request }) => {
-    console.log('📊 MSW: 결제 내역 조회');
-
-    const authHeader = request.headers.get('Authorization');
-    if (!authHeader) {
-      return HttpResponse.json(
-        { message: '인증이 필요합니다.' },
-        { status: 401 },
-      );
-    }
-
-    const mockPaymentHistory = [
-      {
-        id: 1,
-        expertId: 1,
-        expertName: '김전문',
-        amount: 40000,
-        paymentMethod: 'CARD',
-        status: 'COMPLETED',
-        paymentDate: '2024-01-15T14:30:00',
-        consultationDate: '2024-01-20T10:00:00',
-      },
-      {
-        id: 2,
-        expertId: 2,
-        expertName: '이지선',
-        amount: 35000,
-        paymentMethod: 'KAKAO_PAY',
-        status: 'COMPLETED',
-        paymentDate: '2024-01-10T09:15:00',
-        consultationDate: '2024-01-15T15:00:00',
-      },
-    ];
-
-    return HttpResponse.json(mockPaymentHistory);
+    console.log('✅ MSW: 탈퇴 계정 복구 성공');
+    return HttpResponse.json(recoveredUser);
   }),
 ];

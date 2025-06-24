@@ -4,12 +4,7 @@ import { expertData } from './expertData';
 // 상담 내역 데이터 생성 함수
 export const generateConsultationData = (): ConsultationHistory[] => {
   return expertData.slice(0, 8).map((expert, index) => {
-    const typeOptions = [
-      '전화상담',
-      '화상상담',
-      '채팅상담',
-      '이메일상담',
-    ] as const;
+    const typeOptions = ['전화상담', '채팅상담'] as const;
     const paymentOptions = [
       '네이버페이먼츠',
       '카카오페이',

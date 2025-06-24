@@ -1,7 +1,11 @@
 // src/services/auth/loginApi.ts
 import { axiosInstance } from '../api';
 import { API_ENDPOINTS } from '../../config/api';
-import type { LoginRequest, LoginResponse } from '../../types/auth';
+import type {
+  LoginRequest,
+  LoginResponse,
+  RefreshTokenResponse,
+} from '../../types/auth';
 
 export const loginApi = async (data: LoginRequest): Promise<LoginResponse> => {
   console.log('🔐 로그인 API 호출');
@@ -23,7 +27,7 @@ export const loginApi = async (data: LoginRequest): Promise<LoginResponse> => {
   };
 };
 
-// 로그아웃 API - 명세서 준수 (POST /api/v1/auth/logout)
+// 로그아웃 API (POST /api/v1/auth/logout)
 export const logoutApi = async (): Promise<void> => {
   console.log('🚪 로그아웃 API 호출');
   await axiosInstance.post(API_ENDPOINTS.logout);
@@ -63,7 +67,7 @@ export const getSocialLoginUrl = (
   return `${baseUrl}/api/v1/auth/${provider}`;
 };
 
-// OAuth2 소셜 연동 해제 (명세서 준수)
+// OAuth2 소셜 연동 해제
 export const unlinkSocial = async (): Promise<{ message: string }> => {
   console.log('🔗 소셜 연동 해제 API 호출');
   const response = await axiosInstance.delete(API_ENDPOINTS.unlinkSocial);
@@ -71,15 +75,16 @@ export const unlinkSocial = async (): Promise<{ message: string }> => {
   return response.data;
 };
 
-// Access Token 재발급 API (명세서 준수 - 쿠키 기반)
-export const refreshTokenApi = async (): Promise<void> => {
-  console.log('🔄 토큰 재발급 API 호출');
-  // 명세서에 따라 refresh_token 쿠키가 필요하며, 새로운 Access Token을 쿠키로 재발급
-  await axiosInstance.post('/api/v1/auth/refresh', null, {
-    withCredentials: true, // 쿠키 전송 활성화
-    headers: {
-      Authorization: undefined, // Authorization 헤더 제거
+// Access Token 재발급 API (POST /api/v1/auth/refresh)
+export const refreshTokenApi = async (): Promise<RefreshTokenResponse> => {
+  console.log('🔄 Access Token 재발급 API 호출');
+  const response = await axiosInstance.post(
+    API_ENDPOINTS.refresh,
+    {},
+    {
+      withCredentials: true, // 쿠키의 refresh_token 사용
     },
-  });
-  console.log('✅ 토큰 재발급 성공');
+  );
+  console.log('✅ Access Token 재발급 성공');
+  return response.data;
 };

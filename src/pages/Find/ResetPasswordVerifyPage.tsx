@@ -11,7 +11,7 @@ export default function ResetPasswordVerifyPage() {
 
   return (
     <PageWrapper>
-      <PageHeader title="아이디 · 비밀번호 재설정" />
+      <PageHeader title="아이디 · 비밀번호 재설정" showBackButton />
 
       <div className={authStyles.wrapper}>
         <div className={authStyles.container}>

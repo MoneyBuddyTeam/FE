@@ -9,8 +9,6 @@ export const connectChatSocket = ({
   roomId,
   onMessage,
   onConnectChange,
-  onDisconnectForced,
-  onReconnectSuccess,
 }: {
   roomId: number;
   onMessage: (msg: ChatMessage) => void;

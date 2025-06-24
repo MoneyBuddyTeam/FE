@@ -7,7 +7,6 @@ interface ProfileImageSectionProps {
 }
 
 export default function ProfileImageSection({
-  profileImage,
   onImageChange,
 }: ProfileImageSectionProps) {
   return (

@@ -114,10 +114,6 @@ export default function ChallengeStatusPage() {
   const [activeTab, setActiveTab] = useState('all');
   const navigate = useNavigate();
 
-  const handleChallengeDetailClick = (challengeId: number) => {
-    navigate(`/challenge/${challengeId}`);
-  };
-
   // 모의 챌린지 데이터 - 다양한 상태 포함
   const challenges: Challenge[] = [
     {

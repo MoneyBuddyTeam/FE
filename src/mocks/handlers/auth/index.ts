@@ -65,8 +65,15 @@ const validateToken = (token: string | undefined): boolean => {
   );
 };
 
+// 토큰에서 사용자 ID 추출
+const getUserIdFromToken = (token: string) => {
+  const cleanToken = token.replace('Bearer ', '');
+  const payload = cleanToken.split('_');
+  return parseInt(payload[2], 10);
+};
+
 export const authHandlers = [
-  // 로그인 - 명세서 준수 (POST /api/v1/users/login)
+  // 로그인 (POST /api/v1/users/login)
   http.post('/api/v1/users/login', async ({ request }) => {
     const { email, password } = (await request.json()) as {
       email: string;
@@ -112,7 +119,7 @@ export const authHandlers = [
     return response;
   }),
 
-  // 회원가입 - 명세서 준수 (POST /api/v1/users)
+  // 회원가입 (POST /api/v1/users)
   http.post('/api/v1/users', async ({ request }) => {
     const { email, password, nickname } = (await request.json()) as {
       email: string;
@@ -255,162 +262,42 @@ export const authHandlers = [
     }
     return new HttpResponse('네이버 로그인에 실패했습니다.', { status: 401 });
   }),
-
-  // OAuth2 소셜 연동 해제 (명세서 준수)
+  // OAuth2 소셜 연동 해제
   http.delete('/api/v1/auth/unlink', async ({ request }) => {
     console.log('🔗 MSW: 소셜 연동 해제 시도'); // 헤더에서 토큰 확인
     const authHeader = request.headers.get('Authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+
+    if (!validateToken(authHeader || undefined)) {
+      console.log('❌ MSW: 인증되지 않은 사용자 - 소셜 연동 해제');
       return new HttpResponse('인증이 필요합니다.', { status: 401 });
     }
 
-    console.log('✅ MSW: 소셜 연동 해제 성공');
+    const userId = getUserIdFromToken(authHeader!);
+    console.log('✅ MSW: 소셜 연동 해제 성공', { userId });
+
     return new HttpResponse('소셜 연동이 해제되었습니다.', { status: 200 });
   }),
 
-  // MSW 모드용 소셜 로그인 모의 페이지들
-  http.get('/auth/social/kakao/mock', () => {
-    console.log('🔐 MSW: 카카오 모의 로그인 페이지');
+  // Access Token 재발급 (POST /api/v1/auth/refresh)
+  http.post('/api/v1/auth/refresh', ({ request }) => {
+    console.log('🔄 MSW: Access Token 재발급 시도');
 
-    // 모의 HTML 페이지 반환
-    const mockPage = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>카카오 로그인</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 40px; text-align: center; }
-            .login-box { max-width: 400px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
-            button { background: #FEE500; color: #000; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer; font-size: 16px; }
-            button:hover { background: #FFEB3B; }
-          </style>
-        </head>
-        <body>
-          <div class="login-box">
-            <h2>카카오 로그인 (테스트 모드)</h2>
-            <p>테스트용 카카오 로그인 페이지입니다.</p>
-            <button onclick="handleLogin()">카카오로 로그인</button>
-            <br><br>
-            <button onclick="window.close()">취소</button>
-          </div>
-          <script>
-            function handleLogin() {
-              const authCode = 'mock_kakao_auth_code_' + Date.now();
-              window.opener.postMessage({ provider: 'kakao', authCode }, '*');
-              window.close();
-            }
-          </script>
-        </body>
-      </html>
-    `;
-
-    return new HttpResponse(mockPage, {
-      headers: { 'Content-Type': 'text/html' },
-    });
-  }),
-  http.get('/auth/social/google/mock', () => {
-    console.log('🔐 MSW: 구글 모의 로그인 페이지');
-
-    const mockPage = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>구글 로그인</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 40px; text-align: center; }
-            .login-box { max-width: 400px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
-            button { background: #4285F4; color: white; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer; font-size: 16px; }
-            button:hover { background: #3367D6; }
-          </style>
-        </head>
-        <body>
-          <div class="login-box">
-            <h2>구글 로그인 (테스트 모드)</h2>
-            <p>테스트용 구글 로그인 페이지입니다.</p>
-            <button onclick="handleLogin()">Google로 로그인</button>
-            <br><br>
-            <button onclick="window.close()">취소</button>
-          </div>
-          <script>
-            function handleLogin() {
-              const authCode = 'mock_google_auth_code_' + Date.now();
-              window.opener.postMessage({ provider: 'google', authCode }, '*');
-              window.close();
-            }
-          </script>
-        </body>
-      </html>
-    `;
-
-    return new HttpResponse(mockPage, {
-      headers: { 'Content-Type': 'text/html' },
-    });
-  }),
-  http.get('/auth/social/naver/mock', () => {
-    console.log('🔐 MSW: 네이버 모의 로그인 페이지');
-
-    const mockPage = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>네이버 로그인</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 40px; text-align: center; }
-            .login-box { max-width: 400px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
-            button { background: #03C75A; color: white; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer; font-size: 16px; }
-            button:hover { background: #02B050; }
-          </style>
-        </head>
-        <body>
-          <div class="login-box">
-            <h2>네이버 로그인 (테스트 모드)</h2>
-            <p>테스트용 네이버 로그인 페이지입니다.</p>
-            <button onclick="handleLogin()">네이버로 로그인</button>
-            <br><br>
-            <button onclick="window.close()">취소</button>
-          </div>
-          <script>
-            function handleLogin() {
-              const authCode = 'mock_naver_auth_code_' + Date.now();
-              window.opener.postMessage({ provider: 'naver', authCode }, '*');
-              window.close();
-            }
-          </script>
-        </body>
-      </html>
-    `;
-
-    return new HttpResponse(mockPage, {
-      headers: { 'Content-Type': 'text/html' },
-    });
-  }),
-
-  // Access Token 재발급 - 명세서 준수 (POST /api/v1/auth/refresh)
-  http.post('/api/v1/auth/refresh', async ({ request }) => {
-    console.log('🔄 MSW: 토큰 재발급 시도');
-
-    // 명세서에 따라 refresh_token 쿠키 확인
+    // 쿠키에서 refresh_token 확인
     const cookieHeader = request.headers.get('Cookie');
-    const refreshToken = cookieHeader?.match(/refresh_token=([^;]+)/)?.[1];
+    const hasRefreshToken = cookieHeader?.includes('refresh_token=');
 
-    if (!refreshToken) {
+    if (!hasRefreshToken) {
       console.log('❌ MSW: Refresh Token 누락됨');
-      return new HttpResponse('Refresh Token 누락됨', { status: 401 });
+      return new HttpResponse('Refresh Token이 누락되었습니다.', {
+        status: 401,
+      });
     }
 
-    // 토큰 유효성 검증 (간단한 시뮬레이션)
-    if (!refreshToken.startsWith('mock_refresh_token_')) {
-      console.log('❌ MSW: Refresh Token 만료됨');
-      return new HttpResponse('Refresh Token 만료됨', { status: 401 });
-    }
+    // 새로운 액세스 토큰 생성
+    const newAccessToken = generateAccessToken(1);
 
-    // 새로운 Access Token 생성
-    const userId = 1; // 간단하게 사용자 ID 1로 고정
-    const newAccessToken = generateAccessToken(userId);
+    console.log('✅ MSW: Access Token 재발급 성공');
 
-    console.log('✅ MSW: 토큰 재발급 성공');
-
-    // 명세서에 따라 새로운 Access Token을 쿠키로 재발급
     return new HttpResponse('Access Token 재발급 완료', {
       status: 200,
       headers: {
@@ -419,7 +306,7 @@ export const authHandlers = [
     });
   }),
 
-  // 로그아웃 - 명세서 준수 (POST /api/v1/auth/logout)
+  // 로그아웃 (POST /api/v1/auth/logout)
   http.post('/api/v1/auth/logout', ({ request }) => {
     console.log('🚪 MSW: 로그아웃 시도');
 
@@ -552,7 +439,7 @@ export const authHandlers = [
     );
   }),
 
-  // 사용자 설정 조회 (명세서 준수)
+  // 사용자 설정 조회
   http.get('/api/v1/users/:user_id/settings', ({ params }) => {
     const { user_id } = params;
     console.log('⚙️ MSW: 사용자 설정 조회', { user_id });
@@ -563,7 +450,7 @@ export const authHandlers = [
     });
   }),
 
-  // 사용자 설정 수정 (명세서 준수)
+  // 사용자 설정 수정
   http.put('/api/v1/users/:user_id/settings', async ({ params, request }) => {
     const { user_id } = params;
     const body = (await request.json()) as Record<string, unknown>;
@@ -575,7 +462,7 @@ export const authHandlers = [
     });
   }),
 
-  // 비밀번호 확인 API (명세서에 맞춰 추가)
+  // 비밀번호 확인 API
   http.post('/api/v1/auth/verify-password', async ({ request }) => {
     const authHeader = request.headers.get('Authorization');
 

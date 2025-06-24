@@ -1,5 +1,6 @@
 import { axiosInstance } from '../api';
 import { API_ENDPOINTS } from '../../config/api';
+import type { UpdateConsultationStatusRequest } from '../../types/auth';
 
 // 상담 내역 조회 (명세서: GET /api/v1/consultation/rooms)
 export const getConsultationsApi = async () => {
@@ -54,29 +55,16 @@ export const markMessagesAsReadApi = async (roomId: number) => {
   return response.data;
 };
 
-// 상담 상태 변경 (명세서: PATCH /api/v1/consultation/rooms/{id}/status)
-export const updateConsultationStatusApi = async (
-  roomId: number,
-  userId: number,
-  newStatus: 'REQUESTED' | 'SCHEDULED' | 'COMPLETED',
-) => {
-  const response = await axiosInstance.patch(
-    API_ENDPOINTS.consultationStatus(roomId),
-    { userId, newStatus },
-  );
-  return response.data;
-};
-
 // 이미지 업로드 (명세서: POST /api/v1/consultation/{consultation_room_id}/image)
 export const uploadConsultationImageApi = async (
-  roomId: number,
+  consultationRoomId: number,
   imageFile: File,
 ) => {
   const formData = new FormData();
-  formData.append('image', imageFile);
+  formData.append('file', imageFile);
 
   const response = await axiosInstance.post(
-    API_ENDPOINTS.consultationImage(roomId),
+    API_ENDPOINTS.consultationImage(consultationRoomId),
     formData,
     {
       headers: {
@@ -84,6 +72,22 @@ export const uploadConsultationImageApi = async (
       },
     },
   );
+  return response.data;
+};
+
+// 상담 상태 변경 API - 명세서 준수 (PATCH /api/v1/consultation/rooms/{id}/status)
+export const updateConsultationStatusApi = async (
+  roomId: number,
+  statusData: UpdateConsultationStatusRequest,
+) => {
+  console.log(
+    `🔄 상담 상태 변경 API 호출 - Room ID: ${roomId}, Status: ${statusData.newStatus}`,
+  );
+  const response = await axiosInstance.patch(
+    API_ENDPOINTS.consultationStatus(roomId),
+    statusData,
+  );
+  console.log('✅ 상담 상태 변경 성공');
   return response.data;
 };
 

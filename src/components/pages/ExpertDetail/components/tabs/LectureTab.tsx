@@ -1,7 +1,5 @@
 // C:\project\FE\src\components\pages\ExpertDetail\components\tabs\LectureTab.tsx
 
-import React from 'react';
-
 export default function LectureTab() {
   return (
     <div className="bg-gray-100 pt-6 px-5">

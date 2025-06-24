@@ -39,24 +39,32 @@ export interface PaymentHistory {
 
 // 결제 처리 API
 export const processPaymentApi = async (paymentData: any) => {
+  console.log('💳 API 호출: 결제 처리');
   const response = await axiosInstance.post('/api/v1/payments', paymentData);
+  console.log('✅ API 응답: 결제 처리 성공');
   return response.data;
 };
 
 // 결제 상태 조회 API
 export const getPaymentStatusApi = async (paymentId: string) => {
+  console.log(`💳 API 호출: 결제 상태 조회 - ID: ${paymentId}`);
   const response = await axiosInstance.get(`/api/v1/payments/${paymentId}`);
+  console.log('✅ API 응답: 결제 상태 조회 성공');
   return response.data;
 };
 
 // 결제 취소 API
 export const cancelPaymentApi = async (paymentId: string) => {
+  console.log(`💳 API 호출: 결제 취소 - ID: ${paymentId}`);
   const response = await axiosInstance.delete(`/api/v1/payments/${paymentId}`);
+  console.log('✅ API 응답: 결제 취소 성공');
   return response.data;
 };
 
 // 결제 내역 조회 API
 export const getPaymentHistoryApi = async () => {
+  console.log('💳 API 호출: 결제 내역 조회');
   const response = await axiosInstance.get('/api/v1/payments');
+  console.log('✅ API 응답: 결제 내역 조회 성공');
   return response.data;
 };

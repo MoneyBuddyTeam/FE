@@ -1,4 +1,4 @@
-import React, { type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 
 export type TextType = 'H1' | 'H2' | 'H3' | 'H4' | 'B1' | 'B2' | 'B3' | 'B4';
 

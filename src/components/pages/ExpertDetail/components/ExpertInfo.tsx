@@ -1,6 +1,5 @@
 // C:\project\FE\src\components\pages\ExpertDetail\components\ExpertInfo.tsx
 
-import React from 'react';
 import { Star } from 'lucide-react';
 import { COMMA_NUMBER_FORMAT } from '../../../../utils';
 import type { Expert } from '../../../../types/expert';

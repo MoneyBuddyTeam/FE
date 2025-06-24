@@ -1,7 +1,5 @@
 // C:\project\FE\src\components\pages\ExpertDetail\components\ProfileTabs.tsx
 
-import React from 'react';
-
 interface ProfileTabsProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;

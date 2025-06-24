@@ -108,5 +108,18 @@
       "description": "[setup] 패키지 설치"
     }
   ],
-  "gitmoji.onlyUseCustomEmoji": true
+  "gitmoji.onlyUseCustomEmoji": true,
+  "cSpell.words": [
+    "experthandlers",
+    "KAKAO",
+    "kakaopay",
+    "npay",
+    "payco",
+    "paymentfail",
+    "paymentsuccess",
+    "Pretendard",
+    "stompjs",
+    "tosspay",
+    "VITE"
+  ]
 }

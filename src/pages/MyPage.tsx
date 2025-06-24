@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo, type ReactNode } from 'react';
+import { useRef, useMemo, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Settings } from 'lucide-react';
 import PageWrapper from '../components/layout/PageWrapper';
@@ -9,6 +9,7 @@ import ChallengeSection from '../components/pages/MyPage/ChallengeSection';
 import QuickMenu from '../components/pages/MyPage/QuickMenu';
 import CustomerSupportSection from '../components/pages/MyPage/CustomerSupportSection';
 import { useAuthStore } from '../stores/useAuthStore';
+import { logoutApi } from '../services/auth/loginApi';
 import { expertData } from '../data/expertData';
 import {
   generateConsultationData,
@@ -45,6 +46,7 @@ const ScrollContainer = ({ children }: { children: ReactNode }) => {
 export default function MyPage() {
   const navigate = useNavigate();
   const user = useAuthStore(state => state.user);
+  const clearAuth = useAuthStore(state => state.clearAuth);
 
   // 로그인하지 않은 경우 로그인 페이지로 리다이렉트
   if (!user) {
@@ -84,7 +86,7 @@ export default function MyPage() {
       time: nextConsultation.time,
       type: nextConsultation.type,
       status: nextConsultation.status === '예약완료' ? '예약 완료' : '상담 중',
-      duration: '30분', // 기본값
+      duration: '30분',
     };
   }, [nextConsultation]);
 
@@ -123,6 +125,17 @@ export default function MyPage() {
   const handleInquiryClick = () => console.log('1:1 문의');
   const handleNoticeClick = () => console.log('공지사항');
   const handleBannerClick = () => navigate('/experts');
+  const handleLogout = async () => {
+    try {
+      await logoutApi();
+      clearAuth();
+      navigate('/');
+    } catch (error) {
+      console.error('로그아웃 실패:', error);
+      clearAuth();
+      navigate('/');
+    }
+  };
 
   return (
     <PageWrapper>
@@ -192,6 +205,15 @@ export default function MyPage() {
               onInquiryClick={handleInquiryClick}
               onNoticeClick={handleNoticeClick}
             />
+            {/* 로그아웃 버튼 */}
+            <div className="mt-8 mb-6">
+              <button
+                onClick={handleLogout}
+                className="w-full py-3 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors text-sm"
+              >
+                로그아웃
+              </button>
+            </div>
           </div>
         </div>
       </ScrollContainer>

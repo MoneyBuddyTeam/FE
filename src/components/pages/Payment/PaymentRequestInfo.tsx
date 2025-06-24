@@ -1,5 +1,3 @@
-import { paymentStyles } from '../../../styles/payment.styles';
-
 interface PaymentRequestInfoProps {
   request: string;
   setRequest: (request: string) => void;

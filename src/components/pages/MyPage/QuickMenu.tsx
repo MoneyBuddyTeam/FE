@@ -37,7 +37,7 @@ export default function QuickMenu({
   ];
   return (
     <div className={mypageStateStyles.quickMenu.container}>
-      {menuItems.map((item, index) => (
+      {menuItems.map(item => (
         <div key={item.label}>
           <div
             className={mypageStateStyles.quickMenu.item}

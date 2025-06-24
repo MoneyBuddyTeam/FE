@@ -168,4 +168,39 @@ export const authPasswordHandlers = [
       );
     }
   }),
+
+  // 비밀번호 변경 API
+  http.patch('/api/v1/auth/change-password', async ({ request }) => {
+    try {
+      const data = (await request.json()) as any;
+      const authHeader = request.headers.get('Authorization');
+
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return HttpResponse.json(
+          { message: '인증이 필요합니다.' },
+          { status: 401 },
+        );
+      }
+
+      console.log('🔐 MSW: 비밀번호 변경:', data);
+
+      // 테스트용: 현재 비밀번호 확인
+      if (data.currentPassword !== 'password123!') {
+        return HttpResponse.json(
+          { message: '현재 비밀번호가 일치하지 않습니다.' },
+          { status: 400 },
+        );
+      }
+
+      return HttpResponse.json({
+        message: '비밀번호가 성공적으로 변경되었습니다.',
+      });
+    } catch (error) {
+      console.error('❌ MSW - 비밀번호 변경 오류:', error);
+      return HttpResponse.json(
+        { message: '서버 오류가 발생했습니다.' },
+        { status: 500 },
+      );
+    }
+  }),
 ];

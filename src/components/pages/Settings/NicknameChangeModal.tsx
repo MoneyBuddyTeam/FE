@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import BottomSheetModal from '../../common/BottomSheetModal';
 import Text from '../../common/Text';
-import { VALIDATION_RULES } from '../../../config/constants';
 
 interface NicknameChangeModalProps {
   isOpen: boolean;

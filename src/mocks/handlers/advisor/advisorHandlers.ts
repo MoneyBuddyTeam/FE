@@ -12,7 +12,7 @@ interface ExpertListResponse {
 }
 
 export const advisorHandlers = [
-  // 전문가 목록 조회 - 명세서 준수 (GET /api/v1/advisors)
+  // 전문가 목록 조회 (GET /api/v1/advisors)
   http.get(API_ENDPOINTS.advisors, ({ request }) => {
     try {
       const url = new URL(request.url);
@@ -132,7 +132,7 @@ export const advisorHandlers = [
     }
   }),
 
-  // 전문가 상세 조회 - 명세서 준수 (GET /api/v1/advisors/{advisorId})
+  // 전문가 상세 조회 (GET /api/v1/advisors/{advisorId})
   http.get(`${API_ENDPOINTS.advisors}/:id`, ({ params }) => {
     try {
       const expertId = Number(params.id);
@@ -157,7 +157,7 @@ export const advisorHandlers = [
     }
   }),
 
-  // 카테고리 목록 조회 - 명세서 준수 (GET /api/v1/categories)
+  // 카테고리 목록 조회 (GET /api/v1/categories)
   http.get(API_ENDPOINTS.categories, () => {
     const categories = [
       { id: 1, name: '소비', description: '소비 관리 및 절약' },
@@ -169,13 +169,13 @@ export const advisorHandlers = [
     return HttpResponse.json(categories);
   }),
 
-  // 북마크 목록 조회 (프로젝트 전용)
+  // 북마크 목록 조회
   http.get(API_ENDPOINTS.bookmarks, () => {
     const bookmarkedExperts = expertData.slice(0, 3);
     return HttpResponse.json(bookmarkedExperts);
   }),
 
-  // 북마크 토글 (프로젝트 전용)
+  // 북마크 토글
   http.post(`${API_ENDPOINTS.bookmarks}/:advisorId`, ({ params }) => {
     const advisorId = Number(params.advisorId);
     const expert = expertData.find(e => e.id === advisorId);
@@ -193,7 +193,7 @@ export const advisorHandlers = [
     });
   }),
 
-  // 챌린지 전체 조회 - 명세서 준수 (GET /api/v1/challenges)
+  // 챌린지 전체 조회 (GET /api/v1/challenges)
   http.get(API_ENDPOINTS.challenges, () => {
     try {
       const challenges = [
@@ -227,7 +227,33 @@ export const advisorHandlers = [
     }
   }),
 
-  // 챌린지 상세 조회 - 명세서 준수 (GET /api/v1/challenges/{id})
+  // 챌린지 생성 (POST /api/v1/challenges)
+  http.post(API_ENDPOINTS.challenges, async ({ request }) => {
+    try {
+      const body = (await request.json()) as {
+        title: string;
+        description: string;
+      };
+
+      const newChallenge = {
+        id: Math.floor(Math.random() * 1000) + 100,
+        title: body.title,
+        description: body.description,
+        createdAt: new Date().toISOString(),
+      };
+
+      console.log(`🏆 MSW: 챌린지 생성 성공 - ${newChallenge.title}`);
+      return HttpResponse.json(newChallenge);
+    } catch (error) {
+      console.error('❌ MSW: 챌린지 생성 실패', error);
+      return HttpResponse.json(
+        { message: '챌린지 생성에 실패했습니다.' },
+        { status: 500 },
+      );
+    }
+  }),
+
+  // 챌린지 상세 조회 (GET /api/v1/challenges/{id})
   http.get(`${API_ENDPOINTS.challenges}/:id`, ({ params }) => {
     try {
       const challengeId = Number(params.id);
@@ -281,7 +307,7 @@ export const advisorHandlers = [
     }
   }),
 
-  // 타입별 카테고리 조회 - 명세서 준수 (GET /api/v1/categories/type/{type})
+  // 타입별 카테고리 조회 (GET /api/v1/categories/type/{type})
   http.get(`${API_ENDPOINTS.categories}/type/:type`, ({ params }) => {
     try {
       const type = params.type as string;
@@ -305,7 +331,7 @@ export const advisorHandlers = [
     }
   }),
 
-  // 카테고리 상세 조회 - 명세서 준수 (GET /api/v1/categories/{categoryId})
+  // 카테고리 상세 조회 (GET /api/v1/categories/{categoryId})
   http.get(`${API_ENDPOINTS.categories}/:categoryId`, ({ params }) => {
     try {
       const categoryId = Number(params.categoryId);
@@ -364,7 +390,7 @@ export const advisorHandlers = [
     }
   }),
 
-  // 메시지 목록 조회 - 명세서 준수 (GET /api/v1/consultation/rooms/{roomId}/messages)
+  // 메시지 목록 조회 (GET /api/v1/consultation/rooms/{roomId}/messages)
   http.get(
     `${API_ENDPOINTS.consultations}/:roomId/messages`,
     ({ params, request }) => {
@@ -434,7 +460,7 @@ export const advisorHandlers = [
     },
   ),
 
-  // 상담 목록 조회 - 명세서 준수 (GET /api/v1/consultation/rooms)
+  // 상담 목록 조회 (GET /api/v1/consultation/rooms)
   http.get(API_ENDPOINTS.consultations, () => {
     const consultations = [
       {
@@ -448,7 +474,7 @@ export const advisorHandlers = [
     return HttpResponse.json(consultations);
   }),
 
-  // 상담 상세 조회 - 명세서 준수 (GET /api/v1/consultation/rooms/{roomId}/detail)
+  // 상담 상세 조회 (GET /api/v1/consultation/rooms/{roomId}/detail)
   http.get(`${API_ENDPOINTS.consultations}/:roomId/detail`, ({ params }) => {
     const consultation = {
       id: Number(params.roomId),
@@ -462,7 +488,7 @@ export const advisorHandlers = [
     return HttpResponse.json(consultation);
   }),
 
-  // 상담방 나가기 - 명세서 준수 (DELETE /api/v1/consultation/rooms/{roomId}/leave)
+  // 상담방 나가기 (DELETE /api/v1/consultation/rooms/{roomId}/leave)
   http.delete(`${API_ENDPOINTS.consultations}/:roomId/leave`, ({ params }) => {
     try {
       const roomId = Number(params.roomId);
@@ -477,7 +503,7 @@ export const advisorHandlers = [
     }
   }),
 
-  // 메시지 읽음 처리 - 명세서 준수 (PATCH /api/v1/consultation/rooms/{roomId}/read)
+  // 메시지 읽음 처리 (PATCH /api/v1/consultation/rooms/{roomId}/read)
   http.patch(`${API_ENDPOINTS.consultations}/:roomId/read`, ({ params }) => {
     try {
       const roomId = Number(params.roomId);
@@ -491,18 +517,23 @@ export const advisorHandlers = [
       );
     }
   }),
-
-  // 상담 상태 변경 - 명세서 준수 (PATCH /api/v1/consultation/rooms/{id}/status)
+  // 상담 상태 변경 (PATCH /api/v1/consultation/rooms/{id}/status)
   http.patch(
     `${API_ENDPOINTS.consultations}/:roomId/status`,
     async ({ params, request }) => {
       try {
         const roomId = Number(params.roomId);
-        const body = (await request.json()) as { status: string };
+        const body = (await request.json()) as {
+          userId: number;
+          newStatus: 'REQUESTED' | 'SCHEDULED' | 'COMPLETED';
+        };
 
         console.log(
-          `✅ MSW: 상담 상태 변경 성공 - Room ${roomId}, Status: ${body.status}`,
+          `🔄 MSW: 상담 상태 변경 - Room ${roomId}, Status: ${body.newStatus}`,
         );
+
+        // 실제로는 상담 상태를 DB에서 업데이트
+        console.log(`✅ MSW: 상담 상태 변경 성공 - ${body.newStatus}`);
         return new HttpResponse(null, { status: 204 });
       } catch (error) {
         console.error('❌ MSW: 상담 상태 변경 실패', error);
@@ -513,27 +544,7 @@ export const advisorHandlers = [
       }
     },
   ),
-
-  // 이미지 업로드 - 명세서 준수 (POST /api/v1/consultation/{consultationRoomId}/image)
-  http.post(`/api/v1/consultation/:roomId/image`, async ({ params }) => {
-    try {
-      const roomId = Number(params.roomId);
-
-      // 모의 이미지 URL 반환
-      const imageUrl = `https://moneytalk-s3.s3.ap-northeast-2.amazonaws.com/chat-images/room-${roomId}-${Date.now()}.jpg`;
-
-      console.log(`✅ MSW: 이미지 업로드 성공 - Room ${roomId}`);
-      return HttpResponse.json({ imageUrl });
-    } catch (error) {
-      console.error('❌ MSW: 이미지 업로드 실패', error);
-      return HttpResponse.json(
-        { message: '이미지 업로드에 실패했습니다.' },
-        { status: 500 },
-      );
-    }
-  }),
-
-  // 상담 채팅방 생성 - 명세서 준수 (POST /api/v1/consultation/rooms)
+  // 상담 채팅방 생성 (POST /api/v1/consultation/rooms)
   http.post(API_ENDPOINTS.consultations, async ({ request }) => {
     try {
       await request.json(); // 요청 본문은 읽지만 사용하지 않음
@@ -552,7 +563,7 @@ export const advisorHandlers = [
     }
   }),
 
-  // 미션 목록 조회 - 명세서 준수 (GET /api/v1/challenge-participations/{participationId}/missions)
+  // 미션 목록 조회 (GET /api/v1/challenge-participations/{participationId}/missions)
   http.get(
     `/api/v1/challenge-participations/:participationId/missions`,
     ({ params }) => {
@@ -605,7 +616,7 @@ export const advisorHandlers = [
     },
   ),
 
-  // 리포트 생성 - 명세서 준수 (POST /api/v1/reports)
+  // 리포트 생성 (POST /api/v1/reports)
   http.post('/api/v1/reports', async ({ request }) => {
     try {
       const body = (await request.json()) as {
@@ -636,7 +647,7 @@ export const advisorHandlers = [
     }
   }),
 
-  // 단일 리포트 조회 - 명세서 준수 (GET /api/v1/reports/{id})
+  // 단일 리포트 조회 (GET /api/v1/reports/{id})
   http.get('/api/v1/reports/:id', ({ params }) => {
     try {
       const reportId = Number(params.id);
@@ -676,7 +687,7 @@ export const advisorHandlers = [
     }
   }),
 
-  // 사용자별 리포트 전체 조회 - 명세서 준수 (GET /api/v1/reports/users/{userId})
+  // 사용자별 리포트 전체 조회 (GET /api/v1/reports/users/{userId})
   http.get('/api/v1/reports/users/:userId', ({ params }) => {
     try {
       const userId = Number(params.userId);

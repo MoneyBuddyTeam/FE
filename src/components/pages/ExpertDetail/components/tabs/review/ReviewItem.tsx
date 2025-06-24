@@ -1,6 +1,5 @@
 // C:\project\FE\src\components\pages\ExpertDetail\components\tabs\review\ReviewItem.tsx
 
-import React from 'react';
 import { Star } from 'lucide-react';
 
 export default function ReviewItem() {

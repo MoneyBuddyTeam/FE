@@ -1,4 +1,4 @@
-import { useState, useRef, type ReactNode } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import PageWrapper from '../components/layout/PageWrapper';
 import PageHeader from '../components/layout/PageHeader';
@@ -17,33 +17,6 @@ interface PasswordChangeFormData {
 const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&]).{10,}$/;
 
 // 스크롤 컨테이너 컴포넌트
-const ScrollContainer = ({
-  children,
-  title = '비밀번호 변경',
-}: {
-  children: ReactNode;
-  title?: string;
-}) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  return (
-    <div
-      ref={containerRef}
-      className="h-[844px] overflow-y-scroll select-none"
-      style={{
-        scrollbarWidth: 'none',
-        msOverflowStyle: 'none',
-        WebkitOverflowScrolling: 'touch',
-        scrollbarColor: 'transparent transparent',
-      }}
-    >
-      <div className="sticky top-0 bg-white z-20">
-        <PageHeader title={title} showBackButton />
-      </div>
-      <div className="px-5 py-5">{children}</div>
-    </div>
-  );
-};
 
 export default function PasswordChangePage() {
   const [isSuccess, setIsSuccess] = useState(false);
@@ -54,7 +27,6 @@ export default function PasswordChangePage() {
     formState: { errors },
     setError,
     setValue,
-    reset,
   } = useForm<PasswordChangeFormData>({
     mode: 'onChange',
     defaultValues: {

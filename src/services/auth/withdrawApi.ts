@@ -2,7 +2,7 @@ import { axiosInstance } from '../api';
 import { API_ENDPOINTS } from '../../config/api';
 
 // 탈퇴를 위한 비밀번호 확인 API
-export const verifyPasswordForWithdrawApi = async (
+export const verifyPasswordForWithdraw = async (
   password: string,
 ): Promise<void> => {
   console.log('🔒 탈퇴 비밀번호 확인 API 호출');
@@ -17,7 +17,7 @@ export const verifyPasswordForWithdrawApi = async (
 };
 
 // 회원탈퇴 API
-export const withdrawUserApi = async (userId: number): Promise<void> => {
+export const withdrawUser = async (userId: number): Promise<void> => {
   console.log('🗑️ 회원탈퇴 API 호출');
   const response = await axiosInstance.delete(
     `${API_ENDPOINTS.deleteUser(userId)}`,

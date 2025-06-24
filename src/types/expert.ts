@@ -1,5 +1,3 @@
-import { EXPERT_FIELDS, SORT_OPTIONS } from '../config/constants';
-
 export type ExpertField = '소비' | '저축' | '투자' | '부채' | '기타';
 export type SortType =
   | '최신순'
@@ -65,6 +63,7 @@ export interface Expert {
   bio: string;
   is_online: boolean;
   hashtags: string[];
+  isBookmarked?: boolean;
   // 상세 정보 (선택적)
   skills?: string[];
   education?: string[];

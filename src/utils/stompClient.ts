@@ -9,11 +9,7 @@ interface ConnectStompArgs {
   onMessage: (msg: any) => void;
 }
 
-export const connectStomp = ({
-  roomId,
-  token,
-  onMessage,
-}: ConnectStompArgs) => {
+export const connectStomp = ({ roomId, onMessage }: ConnectStompArgs) => {
   stompClient = Stomp.over(() => new SockJS('http://localhost:8080/ws-stomp'));
   stompClient.reconnectDelay = 5000;
 

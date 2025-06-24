@@ -15,6 +15,17 @@ export const axiosInstance = axios.create({
 // 요청 인터셉터
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    // 외부 API 호출 방지 검증
+    if (
+      config.url &&
+      !config.url.startsWith('/api/v1/') &&
+      !config.url.startsWith('http://localhost') &&
+      !config.url.startsWith('https://api.moneybuddy.com')
+    ) {
+      console.error('🚨 외부 API 호출이 차단되었습니다:', config.url);
+      throw new Error(`외부 API 호출이 허용되지 않습니다: ${config.url}`);
+    }
+
     // MSW 디버깅이 활성화된 경우에만 로깅
     if (MSW_CONFIG.debug && MSW_CONFIG.logRequests) {
       console.log('🔍 API 요청:', {
@@ -30,6 +41,18 @@ axiosInstance.interceptors.request.use(
     const token = useAuthStore.getState().accessToken;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    // MSW 환경에서 baseURL 확인
+    if (
+      MSW_CONFIG.enabled &&
+      config.url &&
+      !config.url.startsWith('/api/v1/')
+    ) {
+      console.warn(
+        '⚠️ MSW: API 경로가 /api/v1/로 시작하지 않습니다:',
+        config.url,
+      );
     }
 
     return config;
@@ -61,6 +84,42 @@ axiosInstance.interceptors.response.use(
         data: error.response?.data,
         message: error.message,
       });
+    }
+
+    // MSW 환경에서 북마크 API 오류처리
+    if (
+      MSW_CONFIG.enabled &&
+      error.config?.url &&
+      (error.config.url.includes('/bookmark') ||
+        (error.config.url.includes('advisors') &&
+          error.config.url.includes('bookmark'))) &&
+      error.response?.status === 500
+    ) {
+      console.warn('⚠️ MSW: 북마크 API 오류 감지, 기본 응답 반환');
+      return Promise.resolve({
+        data: { bookmarked: true, message: '북마크가 추가되었습니다.' },
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config: error.config,
+      });
+    }
+
+    // MSW 환경에서 외부 API 호출 감지
+    if (
+      MSW_CONFIG.enabled &&
+      error.config?.url &&
+      error.response?.status === 500
+    ) {
+      const isExternalAPI =
+        error.config.url.includes('apis.data.go.kr') ||
+        !error.config.url.startsWith('/api/v1/');
+      if (isExternalAPI) {
+        console.error(
+          '🚨 MSW: 외부 API 호출이 감지되었습니다. 내부 API 경로를 확인하세요:',
+          error.config.url,
+        );
+      }
     }
 
     // 401 에러 처리 (토큰 만료) - MSW 모드가 아닐 때만 실행

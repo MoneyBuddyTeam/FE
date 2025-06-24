@@ -1,7 +1,8 @@
 // C:\project\FE\src\components\pages\ExpertDetail\ExpertDetailProfile.tsx
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Expert } from '../../../types/expert';
+import { useToggleBookmark } from '../../../hooks/useBookmarks';
 import ProfileHeader from './components/ProfileHeader';
 import ProfileTabs from './components/ProfileTabs';
 import ExpertInfo from './components/ExpertInfo';
@@ -31,10 +32,34 @@ export default function ExpertDetailProfile({
 }: ExpertDetailProfileProps) {
   const [activeTab, setActiveTab] = useState('전문가');
   const [localBookmarkState, setLocalBookmarkState] = useState(isBookmarked);
+  const toggleBookmarkMutation = useToggleBookmark();
 
-  const handleLikeClick = (e: React.MouseEvent) => {
+  // expert 데이터가 변경될 때 북마크 상태 업데이트
+  useEffect(() => {
+    if (expert?.isBookmarked !== undefined) {
+      setLocalBookmarkState(expert.isBookmarked);
+    }
+  }, [expert]);
+
+  const handleLikeClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    setLocalBookmarkState(!localBookmarkState);
+
+    console.log('API 호출: 북마크 토글 - 전문가 ID:', expert.id);
+    console.log('🔖 북마크 핸들러 호출됨:', {
+      advisorId: expert.id.toString(),
+    });
+
+    try {
+      setLocalBookmarkState(!localBookmarkState);
+
+      // API 호출
+      await toggleBookmarkMutation.mutateAsync(expert.id);
+      console.log('✅ 북마크 토글 성공:', expert.nickname);
+    } catch (error) {
+      // 실패 시 원래 상태로 복원
+      setLocalBookmarkState(localBookmarkState);
+      console.error('❌ 북마크 토글 실패:', error);
+    }
   };
 
   return (

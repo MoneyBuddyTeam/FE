@@ -1,6 +1,5 @@
 // C:\project\FE\src\components\pages\ExpertDetail\components\ProfileHeader.tsx
 
-import React from 'react';
 import type { Expert } from '../../../../types/expert';
 
 interface ProfileHeaderProps {

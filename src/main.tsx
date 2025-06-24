@@ -9,7 +9,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5, // 5분
-      retry: (failureCount, error) => {
+      retry: failureCount => {
         // MSW 사용 시 재시도 횟수 조정
         const maxRetries = import.meta.env.VITE_USE_MSW === 'true' ? 1 : 3;
         return failureCount < maxRetries;

@@ -1,6 +1,5 @@
 // C:\project\FE\src\components\pages\ExpertDetail\components\tabs\ReviewTab.tsx
 
-import React from 'react';
 import ReviewSummary from './review/ReviewSummary';
 import ReviewList from './review/ReviewList';
 

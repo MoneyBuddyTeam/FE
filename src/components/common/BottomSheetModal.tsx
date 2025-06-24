@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 
 interface BottomSheetModalProps {
   isOpen: boolean;
@@ -17,14 +17,7 @@ export default function BottomSheetModal({
   children,
   className = '',
 }: BottomSheetModalProps) {
-  const modalRef = useRef<HTMLDivElement>(null);
-
   // 배경 클릭시 닫기
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
 
   // ESC 키 눌렀을 때 닫기
   useEffect(() => {

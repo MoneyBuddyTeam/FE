@@ -9,7 +9,6 @@ interface ChallengeSectionProps {
 
 export default function ChallengeSection({
   challenges,
-  onChallengeClick,
 }: ChallengeSectionProps) {
   const navigate = useNavigate();
   const handleChallengeClick = (challengeId: number) => {

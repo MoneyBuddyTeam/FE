@@ -12,27 +12,8 @@ import { expertData } from '../../data/expertData';
 import { chatHandlers } from './chat/chatHandler';
 import { searchHandlers } from './search/searchHandler';
 
-// 월간 전문가 데이터를 expertData에서 가져오도록 수정
-const getMonthlyExpertsData = () => {
-  return expertData
-    .sort((a, b) => b.rating - a.rating) // 평점 순으로 정렬
-    .slice(0, 5) // 상위 5명만
-    .map((expert, index) => ({
-      id: expert.id,
-      rank: index + 1,
-      name: expert.nickname,
-      description: expert.description,
-      tags: expert.hashtags,
-      rating: expert.rating,
-      reviewCount: expert.review_count,
-      imgUrl: expert.profile_image,
-      isLiked: false,
-    }));
-};
-
-// 북마크 핸들러를 별도로 먼저 정의
 const bookmarkHandler = http.post(
-  '/api/v1/bookmarks/:advisorId',
+  '/api/v1/advisors/:advisorId/bookmark',
   ({ params, request }) => {
     const authHeader = request.headers.get('Authorization');
 
@@ -64,6 +45,49 @@ const bookmarkHandler = http.post(
     });
   },
 );
+
+// 추가 북마크 핸들러들
+const additionalBookmarkHandlers = [
+  // 기존 북마크 토글 API 경로
+  http.post('/api/v1/bookmarks/:advisorId', ({ params, request }) => {
+    const authHeader = request.headers.get('Authorization');
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('❌ 북마크: 인증되지 않은 사용자');
+      return HttpResponse.json(
+        { message: '로그인이 필요합니다.' },
+        { status: 401 },
+      );
+    }
+
+    const advisorId = Number(params.advisorId);
+    console.log('🔖 기존 북마크 핸들러 호출됨:', advisorId);
+    return HttpResponse.json({
+      bookmarked: true,
+      message: '북마크가 토글되었습니다.',
+    });
+  }),
+
+  // bookmarkApi.ts에서 사용하는 토글 경로
+  http.post('/api/v1/bookmarks/toggle/:advisorId', ({ params, request }) => {
+    const authHeader = request.headers.get('Authorization');
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('❌ 북마크: 인증되지 않은 사용자');
+      return HttpResponse.json(
+        { message: '로그인이 필요합니다.' },
+        { status: 401 },
+      );
+    }
+
+    const advisorId = Number(params.advisorId);
+    console.log('🔖 토글 북마크 핸들러 호출됨:', advisorId);
+    return HttpResponse.json({
+      bookmarked: true,
+      message: '북마크가 토글되었습니다.',
+    });
+  }),
+];
 
 // 예약 관련 핸들러
 const reservationHandlers = [
@@ -190,165 +214,8 @@ const paymentHandlers = [
 ];
 
 // 전문가 상세 조회 핸들러 추가 - MSW에서 처리되도록 수정
-const expertDetailHandlers = [
-  // 전문가 상세 조회 (/api/v1/experts/:id)
-  http.get('/api/v1/experts/:id', ({ params }) => {
-    const expertId = Number(params.id);
-    const expert = expertData.find(e => e.id === expertId);
-
-    console.log(`🔍 MSW: 전문가 상세 조회 - ID: ${expertId}`);
-
-    if (!expert) {
-      console.log(`❌ MSW: 전문가를 찾을 수 없음 - ID: ${expertId}`);
-      return HttpResponse.json(
-        { message: '전문가를 찾을 수 없습니다.' },
-        { status: 404 },
-      );
-    }
-
-    // 추가 상세 정보 포함하여 반환
-    const expertDetail = {
-      ...expert,
-      // 추가 상세 정보
-      skills: ['디지털 소비 분석', '예산 관리', '재정 계획'],
-      education: ['서울대학교 경영학과', 'CFA Level 3'],
-      career: ['금융투자협회 10년', '재무상담사 5년'],
-      contact_hours: '평일 10:00 - 19:00',
-      response_time: '평균 2시간 이내',
-      consultation_formats: ['채팅', '화상', '이메일'],
-    };
-
-    console.log(`✅ MSW: 전문가 상세 정보 반환 - ${expert.nickname}`);
-    return HttpResponse.json(expertDetail);
-  }),
-];
 
 // 전문가 리스트 및 상세 핸들러 (ExpertListPage, ExpertDetailPage용)
-const expertListHandlers = [
-  // 월간 전문가 조회 - expertData에서 동적으로 생성
-  http.get('/api/v1/experts/monthly', () => {
-    console.log('🎯 MSW: 월간 전문가 데이터 반환 중...');
-    return HttpResponse.json(getMonthlyExpertsData());
-  }),
-
-  // 전문가 목록 조회 (필터링, 정렬, 페이지네이션 포함)
-  http.get('/api/v1/experts', ({ request }) => {
-    const url = new URL(request.url);
-    const category = url.searchParams.get('category');
-    const sort = url.searchParams.get('sort');
-    const page = parseInt(url.searchParams.get('page') || '1');
-    const limit = parseInt(url.searchParams.get('limit') || '10');
-
-    // expertData 사용 (실제 데이터)
-    let allExperts = [...expertData];
-
-    // 카테고리 필터링
-    if (category && category !== '전체') {
-      allExperts = allExperts.filter(expert => expert.field === category);
-    }
-
-    // 정렬
-    if (sort) {
-      allExperts.sort((a, b) => {
-        switch (sort) {
-          case '평점순':
-            return b.rating - a.rating;
-          case '리뷰많은순':
-            return b.review_count - a.review_count;
-          case '낮은가격순':
-            return a.price - b.price;
-          case '높은가격순':
-            return b.price - a.price;
-          default:
-            return 0;
-        }
-      });
-    }
-
-    // 페이지네이션
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const paginatedExperts = allExperts.slice(startIndex, endIndex);
-
-    return HttpResponse.json({
-      experts: paginatedExperts,
-      total: allExperts.length,
-      page,
-      limit,
-      hasMore: endIndex < allExperts.length,
-    });
-  }),
-
-  // 카테고리 목록 조회
-  http.get('/api/v1/categories', () => {
-    const categories = [
-      { id: 1, name: '소비', description: '소비 관리 및 절약' },
-      { id: 2, name: '저축', description: '저축 및 자산 관리' },
-      { id: 3, name: '투자', description: '주식 및 투자 상품' },
-      { id: 4, name: '부채', description: '부채 관리 및 상환' },
-      { id: 5, name: '기타', description: '기타 재무 상담' },
-    ];
-    return HttpResponse.json(categories);
-  }),
-  // 새로운 북마크 토글 (새 API 경로)
-  http.post('/api/v1/users/bookmarks/:expertId', ({ params, request }) => {
-    const authHeader = request.headers.get('Authorization');
-
-    // 인증 체크
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.log('❌ 북마크: 인증되지 않은 사용자');
-      return HttpResponse.json(
-        { message: '로그인이 필요합니다.' },
-        { status: 401 },
-      );
-    }
-
-    const expertId = Number(params.expertId);
-    console.log('🔖 새 북마크 핸들러 호출됨:', expertId);
-    return HttpResponse.json({
-      expertId,
-      bookmarked: true,
-      message: '북마크가 추가되었습니다.',
-    });
-  }),
-
-  // 북마크 목록 조회
-  http.get('/api/v1/users/bookmarks', ({ request }) => {
-    const authHeader = request.headers.get('Authorization');
-
-    // 인증 체크
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.log('❌ 북마크 목록: 인증되지 않은 사용자');
-      return HttpResponse.json(
-        { message: '로그인이 필요합니다.' },
-        { status: 401 },
-      );
-    }
-
-    try {
-      // 북마크된 엑스퍼트는 평점이 높거나 리뷰가 많은 엑스퍼트들로 구성
-      const bookmarkedExperts = expertData
-        .filter(expert => expert.rating >= 4.7) // 평점 4.7 이상
-        .slice(0, 8) // 최대 8명
-        .map(expert => ({
-          ...expert,
-          // 북마크된 상태임을 명시
-          isBookmarked: true,
-        }));
-
-      console.log(
-        `✅ MSW: 북마크 목록 조회 성공 - ${bookmarkedExperts.length}개`,
-      );
-      return HttpResponse.json(bookmarkedExperts);
-    } catch (error) {
-      console.error('❌ MSW - 북마크 목록 조회 오류:', error);
-      return HttpResponse.json(
-        { message: '서버 오류가 발생했습니다.' },
-        { status: 500 },
-      );
-    }
-  }),
-];
 
 // 상담 관련 핸들러 추가
 const consultationHandlers = [
@@ -436,99 +303,11 @@ const consultationHandlers = [
 ];
 
 // 마이페이지 관련 핸들러 추가
-const mypageHandlers = [
-  // 사용자 정보 조회
-  http.get('/api/v1/users/me', ({ request }) => {
-    const authHeader = request.headers.get('Authorization');
 
-    // 인증 체크
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.log('❌ 마이페이지: 인증되지 않은 사용자');
-      return HttpResponse.json(
-        { message: '로그인이 필요합니다.' },
-        { status: 401 },
-      );
-    }
-
-    return HttpResponse.json({
-      id: 1,
-      nickname: '머니버디맨',
-      email: 'user@example.com',
-      profileImage: '/jpg/experts/expert1.png',
-    });
-  }),
-
-  // 상담 내역 조회 (마이페이지용)
-  http.get('/api/v1/mypage/consultations', ({ request }) => {
-    const authHeader = request.headers.get('Authorization');
-
-    // 인증 체크
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.log('❌ 마이페이지 상담내역: 인증되지 않은 사용자');
-      return HttpResponse.json(
-        { message: '로그인이 필요합니다.' },
-        { status: 401 },
-      );
-    }
-
-    const consultation = {
-      id: 1,
-      expertName: '박재현',
-      expertImage: '/jpg/experts/expert1.png',
-      date: '2025년 1월 25일 월요일',
-      time: '오전 10:00~오전 10:30',
-      type: '전화 상담',
-      status: '예약 완료',
-      duration: '1시간',
-    };
-    return HttpResponse.json(consultation);
-  }),
-
-  // 챌린지 정보 조회
-  http.get('/api/v1/mypage/challenges', ({ request }) => {
-    const authHeader = request.headers.get('Authorization');
-
-    // 인증 체크
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.log('❌ 마이페이지 챌린지: 인증되지 않은 사용자');
-      return HttpResponse.json(
-        { message: '로그인이 필요합니다.' },
-        { status: 401 },
-      );
-    }
-
-    const challenge = {
-      id: 1,
-      title: '챌린지를 수행해주세요',
-      deadline: '2025.12.25 까지 (D-00)',
-      percentage: 20,
-    };
-    return HttpResponse.json(challenge);
-  }),
-];
-
-// 회원탈퇴 관련 핸들러 추가
-const withdrawHandlers = [
-  // 회원탈퇴 비밀번호 확인
-  http.post('/api/v1/auth/verify-password-withdraw', async ({ request }) => {
-    const { password } = (await request.json()) as { password: string };
-    console.log('🔐 탈퇴 비밀번호 확인:', password);
-
-    // 간단한 비밀번호 검증 (실제로는 서버에서 해시 비교)
-    if (password === 'wrongpassword') {
-      return HttpResponse.json(
-        { message: '틀린 비밀번호 입니다. 다시 입력해주세요.' },
-        { status: 400 },
-      );
-    }
-
-    return HttpResponse.json({
-      message: '비밀번호 확인 완료',
-      success: true,
-    });
-  }),
-  // 회원탈퇴
-  http.post('/api/v1/auth/withdraw', async ({ request }) => {
+// 회원탈퇴 핸들러
+const withdrawHandler = http.post(
+  '/api/v1/auth/withdraw',
+  async ({ request }) => {
     const authHeader = request.headers.get('Authorization');
 
     // 인증 체크
@@ -548,8 +327,8 @@ const withdrawHandlers = [
       message: '회원탈퇴가 완료되었습니다.',
       success: true,
     });
-  }),
-];
+  },
+);
 
 // 기본 헬스체크 핸들러만 유지
 export const defaultHandlers = [
@@ -572,7 +351,11 @@ export const handlers = [
   ...defaultHandlers,
   ...chatHandlers,
   ...searchHandlers,
+  bookmarkHandler,
+  ...additionalBookmarkHandlers,
+  withdrawHandler,
 ];
+
 export const otherHandlers = [
   ...reservationHandlers,
   ...paymentHandlers,

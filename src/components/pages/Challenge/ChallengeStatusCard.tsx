@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface Challenge {
   id: number;
   title: string;

@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, type ReactNode } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import PageWrapper from '../../components/layout/PageWrapper';
 import PageHeader from '../../components/layout/PageHeader';
 import { useExpert } from '../../hooks/useExpert';
@@ -48,7 +48,6 @@ const ScrollContainer = ({
 
 export default function PaymentPage() {
   const navigate = useNavigate();
-  const location = useLocation();
   const { expertId } = useParams();
   const {
     expert: storeExpert,

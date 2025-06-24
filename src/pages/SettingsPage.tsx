@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../stores/useAuthStore';
 import { useCurrentUser, useUpdateUser } from '../hooks/useUserProfile';
-import { useUnlinkSocial } from '../hooks/useChangePassword';
-import { useVerifyPassword } from '../hooks/useVerifyPassword';
 import PageWrapper from '../components/layout/PageWrapper';
 import PageHeader from '../components/layout/PageHeader';
 import ProfileImageSection from '../components/pages/Settings/ProfileImageSection';
@@ -50,8 +48,6 @@ export default function SettingsPage() {
   const setAuth = useAuthStore(state => state.setAuth);
   const { data: currentUser } = useCurrentUser();
   const updateUserMutation = useUpdateUser();
-  const unlinkSocialMutation = useUnlinkSocial();
-  const verifyPasswordMutation = useVerifyPassword();
 
   const [isNicknameModalOpen, setIsNicknameModalOpen] = useState(false); // 현재 사용자 정보 (zustand에서 가져오거나 API에서 가져온 데이터 사용)
   const userInfo = currentUser || user;
@@ -156,32 +152,6 @@ export default function SettingsPage() {
   };
   const handleWithdraw = () => {
     navigate('/withdraw');
-  };
-
-  const handleUnlinkSocial = async () => {
-    if (window.confirm('소셜 연동을 해제하시겠습니까?')) {
-      try {
-        await unlinkSocialMutation.mutateAsync();
-        alert('소셜 연동이 해제되었습니다.');
-      } catch (error) {
-        console.error('소셜 연동 해제 실패:', error);
-        alert('소셜 연동 해제에 실패했습니다.');
-      }
-    }
-  };
-
-  const handlePasswordVerification = async () => {
-    const password = prompt('비밀번호를 입력하세요:');
-    if (!password) return;
-
-    try {
-      await verifyPasswordMutation.mutateAsync(password);
-      alert('비밀번호가 확인되었습니다.');
-      // 보안 설정 페이지로 이동 등의 추가 로직
-    } catch (error) {
-      console.error('비밀번호 확인 실패:', error);
-      alert('비밀번호가 일치하지 않습니다.');
-    }
   };
 
   return (

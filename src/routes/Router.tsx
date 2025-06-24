@@ -9,7 +9,7 @@ import HomePage from '../pages/Homepage';
 import LoginPage from '../pages/LoginPage';
 import SignupPage from '../pages/SignupPage';
 import FindAccountPage from '../components/pages/auth/FindAccountPage';
-import ResetPasswordVerifyForm from '../components/pages/auth/ResetPasswordVerifyForm';
+import ResetPasswordVerifyPage from '../pages/Find/ResetPasswordVerifyPage';
 import ResetPasswordForm from '../components/pages/auth/ResetPasswordForm';
 import ExpertPage from '../pages/Expert/ExpertPage';
 import MyPage from '../pages/MyPage';
@@ -31,6 +31,8 @@ import BookmarkedExpertsPage from '../pages/Bookmarks/BookmarkedExpertsPage';
 import ChallengeStatusPage from '../pages/Challenge/ChallengeStatusPage';
 import ChallengeDetailPage from '../pages/Challenge/ChallengeDetailPage';
 import WithdrawPage from '../pages/WithdrawPage';
+import AccountRecoveryPage from '../pages/auth/AccountRecoveryPage';
+import ChallengeCreatePage from '../pages/admin/ChallengeCreatePage';
 
 // Reservation sub-pages
 import ConcernSelectPage from '../pages/Reservation/ConcernSelectPage';
@@ -72,25 +74,25 @@ export default function Router() {
       <Route
         path="/find-account"
         element={
-          <PublicLayout>
+          <DefaultLayout>
             <FindAccountPage />
-          </PublicLayout>
+          </DefaultLayout>
         }
       />
       <Route
         path="/reset-password-verify"
         element={
-          <PublicLayout>
-            <ResetPasswordVerifyForm />
-          </PublicLayout>
+          <DefaultLayout>
+            <ResetPasswordVerifyPage />
+          </DefaultLayout>
         }
       />
       <Route
         path="/reset-password"
         element={
-          <PublicLayout>
+          <DefaultLayout>
             <ResetPasswordForm />
-          </PublicLayout>
+          </DefaultLayout>
         }
       />
       <Route
@@ -288,6 +290,22 @@ export default function Router() {
         element={
           <PrivateRoute>
             <ConsultationRoomPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/account-recovery"
+        element={
+          <PublicLayout>
+            <AccountRecoveryPage />
+          </PublicLayout>
+        }
+      />
+      <Route
+        path="/admin/challenges/create"
+        element={
+          <PrivateRoute>
+            <ChallengeCreatePage />
           </PrivateRoute>
         }
       />

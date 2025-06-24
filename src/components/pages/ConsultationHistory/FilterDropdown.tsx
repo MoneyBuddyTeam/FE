@@ -38,7 +38,7 @@ export default function FilterDropdown({
       {/* 드롭다운 메뉴 */}
       {isOpen && (
         <div className="absolute top-[36px] right-0 flex flex-col bg-white border border-gray-200 rounded-lg shadow-md z-10 py-2 min-w-[95px]">
-          {options.map((option, index) => (
+          {options.map(option => (
             <button
               key={option}
               onClick={() => handleFilterSelect(option)}

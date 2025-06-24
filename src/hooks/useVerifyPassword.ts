@@ -1,10 +1,10 @@
 import { useMutation } from '@tanstack/react-query';
-import { verifyPasswordApi } from '../services/auth/userApi';
+import { verifyPassword } from '../services/auth/userApi';
 
-// 비밀번호 확인 훅 (명세서에 맞춘 새로운 API)
+// 비밀번호 확인 훅
 export const useVerifyPassword = () => {
   return useMutation({
-    mutationFn: verifyPasswordApi,
+    mutationFn: verifyPassword,
     onSuccess: () => {
       console.log('✅ 비밀번호 확인 성공');
     },

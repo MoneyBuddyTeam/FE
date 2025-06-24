@@ -1,5 +1,3 @@
-import { paymentStyles } from '../../../styles/payment.styles';
-
 // 결제 수단 타입
 type PaymentMethodType = 'card' | 'npay' | 'kakaopay' | 'payco' | 'tosspay';
 
@@ -27,32 +25,6 @@ export default function PaymentMethodInfo({
   ];
 
   // 간편 결제 수단
-  const simpleMethods = [
-    {
-      id: 'npay' as const,
-      name: '네이버페이',
-      imageSrc: '/images/payment/npay.png',
-      altText: '네이버페이',
-    },
-    {
-      id: 'kakaopay' as const,
-      name: '카카오페이',
-      imageSrc: '/images/payment/kakaopay.png',
-      altText: '카카오페이',
-    },
-    {
-      id: 'payco' as const,
-      name: '페이코',
-      imageSrc: '/images/payment/payco.png',
-      altText: '페이코',
-    },
-    {
-      id: 'tosspay' as const,
-      name: '토스페이',
-      imageSrc: '/images/payment/tosspay.png',
-      altText: '토스페이',
-    },
-  ];
 
   return (
     <div className="flex flex-col items-start py-[24px] gap-[14px] w-[390px] h-[327px]">

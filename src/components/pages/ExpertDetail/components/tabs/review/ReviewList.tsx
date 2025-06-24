@@ -1,6 +1,5 @@
 // C:\project\FE\src\components\pages\ExpertDetail\components\tabs\review\ReviewList.tsx
 
-import React from 'react';
 import ReviewItem from './ReviewItem';
 
 export default function ReviewList() {

@@ -1,6 +1,5 @@
 import { ChevronRight } from 'lucide-react';
 import Text from '../../common/Text';
-import { mypageStyles } from '../../../styles/mypage.styles';
 
 interface ConsultationData {
   id: number;
