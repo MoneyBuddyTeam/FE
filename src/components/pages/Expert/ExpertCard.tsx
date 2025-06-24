@@ -4,6 +4,7 @@ import HeartEmptyIcon from '../../../assets/icons/common/heartEmpty.png';
 import { useExpertStore } from '../../../stores/useExpertStore';
 import type { MonthlyExpert } from '../../../types/api/expert/expert';
 import type { JSX } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface Expert {
   id: number;
@@ -40,6 +41,7 @@ export default function ExpertCard({
   } = expert;
 
   const toggleLike = useExpertStore(state => state.toggleLike);
+  const navigate = useNavigate();
 
   const rankColors: Record<number, string> = {
     1: 'bg-yellow-400',
@@ -50,7 +52,8 @@ export default function ExpertCard({
 
   return (
     <div
-      className={`relative flex items-start p-3 border rounded-xl bg-white ${
+      onClick={() => navigate(`/experts/${id}`)}
+      className={`relative flex items-start p-3 border rounded-xl bg-white cursor-pointer ${
         variant === 'search' ? 'h-auto' : 'h-[120px]'
       }`}
     >
@@ -91,7 +94,10 @@ export default function ExpertCard({
 
       {variant === 'monthly' && (
         <button
-          onClick={() => toggleLike(id)}
+          onClick={e => {
+            e.stopPropagation();
+            toggleLike(id);
+          }}
           className="absolute right-3 top-1/2 -translate-y-1/2"
         >
           <img
