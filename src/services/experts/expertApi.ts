@@ -14,7 +14,9 @@ import type {
 
 // 월간 전문가 조회 (프로젝트 전용 - 명세서에 없음)
 export const getMonthlyExperts = async (): Promise<MonthlyExpert[]> => {
-  const response = await axiosInstance.get('/api/v1/experts/monthly');
+  const response = await axiosInstance.get(API_ENDPOINTS.advisors, {
+    params: { sort: 'monthly', limit: 5 },
+  });
   return response.data;
 };
 
