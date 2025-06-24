@@ -1,6 +1,7 @@
 import { http, HttpResponse } from 'msw';
 import { API_ENDPOINTS } from '../../../config/api';
 import { expertData } from '../../../data/expertData';
+import type { MonthlyExpert } from '../../../types/api/expert/expert';
 
 // ExpertListResponse 타입을 직접 정의
 interface ExpertListResponse {
@@ -10,6 +11,24 @@ interface ExpertListResponse {
   limit: number;
   hasMore: boolean;
 }
+
+// 월간 전문가 생성 함수
+const getMonthlyExpertsFromData = (): MonthlyExpert[] => {
+  return expertData
+    .sort((a, b) => b.rating - a.rating)
+    .slice(0, 5)
+    .map((expert, index) => ({
+      id: expert.id,
+      rank: index + 1,
+      name: expert.nickname,
+      description: expert.description,
+      tags: expert.hashtags,
+      rating: expert.rating,
+      reviewCount: expert.review_count,
+      imgUrl: expert.profile_image,
+      isLiked: false,
+    }));
+};
 
 export const advisorHandlers = [
   // 전문가 목록 조회 (GET /api/v1/advisors)
@@ -24,6 +43,13 @@ export const advisorHandlers = [
       const size = parseInt(url.searchParams.get('size') || '10');
 
       let filtered = [...expertData];
+
+      if (sort === 'monthly') {
+        console.log('🎯 MSW: 월간 전문가 반환');
+        const limit = Number(url.searchParams.get('limit')) || 5;
+        const monthlyExperts = getMonthlyExpertsFromData().slice(0, limit);
+        return HttpResponse.json(monthlyExperts);
+      }
 
       // 카테고리 필터링
       if (category_id) {

@@ -25,10 +25,11 @@ interface ExpertResponse {
 // 월간 전문가 조회
 export const getMonthlyExperts = async (
   page: number = 0,
-  size: number = 20,
+  size: number = 5,
 ): Promise<ExpertResponse> => {
   const response = await axiosInstance.get(API_ENDPOINTS.advisors, {
-    params: { sort: 'monthly', page, size },
+    params: { sort: 'rating,desc', page, size },
+    // params: { sort: 'monthly', page, size },
   });
 
   // API 응답이 이미 ExpertResponse 형식인 경우 그대로 반환

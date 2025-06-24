@@ -40,12 +40,14 @@ export default function ChatHeader() {
           API_ENDPOINTS.advisorDetail(advisorId),
         );
 
-        setExpertName(advisorRes.data.name || '전문가');
+        console.log('🔍 전체 응답', advisorRes.data);
+
+        const name = advisorRes.data.name ?? advisorRes.data.nickname;
+        setExpertName(name ? `${name} 전문가` : '전문가');
         setExpertImage(advisorRes.data.profileImageUrl || '');
       } catch (error) {
         console.error('❌ 전문가 정보 불러오기 실패:', error);
         setExpertName('이름 없는 전문가');
-        // setExpertImage('/default-profile.png');
       }
     };
 
@@ -68,6 +70,7 @@ export default function ChatHeader() {
         <button onClick={() => navigation(-1)}>
           <ChevronLeft size={24} />
         </button>
+
         {expertImage && (
           <img
             src={expertImage}
@@ -75,6 +78,7 @@ export default function ChatHeader() {
             className="w-8 h-8 rounded-full object-cover"
           />
         )}
+
         <div className="text-lg font-semibold">{expertName}</div>
       </div>
 
