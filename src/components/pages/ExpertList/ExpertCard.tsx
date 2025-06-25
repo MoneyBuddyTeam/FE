@@ -108,7 +108,7 @@ export default function ExpertCard({
             </Text>
             <div className="mt-2 flex items-center">
               <span className="font-semibold text-[14px] leading-[130%] tracking-[0%] flex items-center text-[#000000]">
-                {COMMA_NUMBER_FORMAT(expert.price)}원
+                {COMMA_NUMBER_FORMAT(expert.price || 0)}원
               </span>
               <span className="font-normal text-[12px] leading-[130%] tracking-[0%] text-[#777777] flex items-center">
                 /회
@@ -185,7 +185,7 @@ export default function ExpertCard({
           </div>
           <div className="mt-2 flex items-center">
             <span className="font-semibold text-[14px] leading-[130%] tracking-[0%] align-middle text-[#000000]">
-              {COMMA_NUMBER_FORMAT(expert.price)}원
+              {COMMA_NUMBER_FORMAT(expert.price || 0)}원
             </span>
             <span className="font-normal text-[12px] leading-[130%] tracking-[0%] align-middle text-[#777777]">
               /1회

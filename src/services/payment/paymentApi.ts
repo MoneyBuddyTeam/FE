@@ -82,11 +82,11 @@ export const cancelPaymentApi = async (paymentId: string, reason: string) => {
   return response.data;
 };
 
-// 결제 상태 조회 API
+// 결제 상태 조회 API (임시 - 명세서에 추가 필요)
 export const getPaymentStatusApi = async (
   paymentId: string,
 ): Promise<PaymentStatus> => {
-  console.log('💳 API 호출: 결제 상태 조회');
+  console.log('💳 API 호출: 결제 상태 조회 (임시 API)');
   const response = await axiosInstance.get(
     `/api/v1/payments/${paymentId}/status`,
   );

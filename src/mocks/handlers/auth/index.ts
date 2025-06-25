@@ -1,15 +1,9 @@
 import { http, HttpResponse } from 'msw';
+import { MOCK_USER } from './constants';
 
 // 임시 사용자 데이터베이스 (실제로는 서버 DB)
 const users = [
-  {
-    id: 1,
-    email: 'test@example.com',
-    password: 'password123!', // 현재 테스트 비밀번호
-    nickname: '테스트사용자',
-    role: 'USER',
-    profile_image: '/jpg/experts/expert1.png',
-  },
+  { ...MOCK_USER, social_provider: undefined },
   // 소셜 로그인 테스트 사용자들 추가
   {
     id: 2,
@@ -61,7 +55,9 @@ const validateToken = (token: string | undefined): boolean => {
   const cleanToken = token.replace('Bearer ', '');
   // MSW 환경에서는 mock_access_token으로 시작하는 토큰을 유효한 것으로 간주
   return (
-    cleanToken.startsWith('mock_access_token_') || activeTokens.has(cleanToken)
+    cleanToken.startsWith('mock_access_token_') ||
+    cleanToken.startsWith('mock_login_access_token_') ||
+    activeTokens.has(cleanToken)
   );
 };
 
@@ -147,6 +143,7 @@ export const authHandlers = [
       nickname,
       role: 'USER' as const,
       profile_image: '/jpg/experts/expert1.png',
+      social_provider: undefined,
     };
 
     users.push(newUser);
@@ -328,116 +325,13 @@ export const authHandlers = [
         ].join(', '),
       },
     });
-  }), // 비밀번호 변경 API - 올바른 엔드포인트로 수정
-  http.patch('/api/v1/auth/change-password', async ({ request }) => {
-    const authHeader = request.headers.get('Authorization');
-
-    // 인증 체크
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.log('❌ MSW: 비밀번호 변경 - 인증되지 않은 사용자');
-      return HttpResponse.json(
-        { message: '인증이 필요합니다.' },
-        { status: 401 },
-      );
-    }
-
-    // 간단한 토큰 검증
-    const token = authHeader.replace('Bearer ', '');
-    if (!token.startsWith('mock_access_token_')) {
-      console.log('❌ MSW: 비밀번호 변경 - 유효하지 않은 토큰');
-      return HttpResponse.json(
-        { message: '인증이 필요합니다.' },
-        { status: 401 },
-      );
-    }
-
-    const { currentPassword, newPassword } = (await request.json()) as {
-      currentPassword: string;
-      newPassword: string;
-    };
-
-    console.log('🔑 MSW: 비밀번호 변경 요청'); // 현재 비밀번호 확인 (실제로는 해시 비교)
-    if (currentPassword !== 'password123!') {
-      console.log('❌ MSW: 현재 비밀번호가 일치하지 않음');
-      return HttpResponse.json(
-        { message: '틀린 비밀번호 입니다. 다시 입력해주세요.' },
-        { status: 400 },
-      );
-    }
-
-    // 새 비밀번호 유효성 검사
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&]).{10,}$/;
-    if (!passwordRegex.test(newPassword)) {
-      console.log('❌ MSW: 비밀번호 변경 실패 - 유효하지 않은 새 비밀번호');
-      return HttpResponse.json(
-        {
-          message:
-            '비밀번호는 영문, 숫자, 특수문자 포함 10자 이상이어야 합니다.',
-        },
-        { status: 400 },
-      );
-    }
-
-    console.log('✅ MSW: 비밀번호 변경 성공');
-    return HttpResponse.json({
-      message: '비밀번호가 성공적으로 변경되었습니다.',
-    });
   }),
 
-  // 아이디 찾기
-  http.post('/api/v1/users/find-id', async ({ request }) => {
-    const { name, phone } = (await request.json()) as {
-      name: string;
-      phone: string;
-    };
+  // 아이디 찾기는 findIdHandlers.ts에서 처리됨 (중복 제거)
+  // http.post('/api/v1/users/find-id', ...
 
-    console.log('🔍 MSW: 아이디 찾기 요청', { name, phone });
-
-    // 간단한 검증 (실제로는 DB 조회)
-    if (name === '테스트' && phone === '010-1234-5678') {
-      console.log('✅ MSW: 아이디 찾기 성공');
-      return HttpResponse.json({
-        email: 'test@example.com',
-        message: '아이디를 찾았습니다.',
-      });
-    }
-
-    console.log('❌ MSW: 아이디 찾기 실패 - 일치하는 정보 없음');
-    return HttpResponse.json(
-      { message: '일치하는 사용자 정보를 찾을 수 없습니다.' },
-      { status: 404 },
-    );
-  }),
-
-  // 비밀번호 재설정
-  http.post('/api/v1/users/reset-password', async ({ request }) => {
-    const { email, name, phone } = (await request.json()) as {
-      email: string;
-      name: string;
-      phone: string;
-    };
-
-    console.log('🔒 MSW: 비밀번호 재설정 요청', { email, name, phone });
-
-    // 간단한 검증
-    if (
-      email === 'test@example.com' &&
-      name === '테스트' &&
-      phone === '010-1234-5678'
-    ) {
-      console.log('✅ MSW: 비밀번호 재설정 성공');
-      return HttpResponse.json({
-        message: '임시 비밀번호가 전송되었습니다.',
-        tempPassword: 'temp123456',
-      });
-    }
-
-    console.log('❌ MSW: 비밀번호 재설정 실패 - 일치하는 정보 없음');
-    return HttpResponse.json(
-      { message: '일치하는 사용자 정보를 찾을 수 없습니다.' },
-      { status: 404 },
-    );
-  }),
+  // 비밀번호 재설정은 resetPasswordHandlers.ts에서 처리됨 (중복 제거)
+  // http.post('/api/v1/users/reset-password', ...
 
   // 사용자 설정 조회
   http.get('/api/v1/users/:user_id/settings', ({ params }) => {

@@ -1,11 +1,6 @@
 import { create } from 'zustand';
 import { persist, devtools } from 'zustand/middleware';
-
-type User = {
-  id: number;
-  nickname: string;
-  role: string;
-};
+import type { User } from '../types/auth';
 
 type AuthState = {
   user: User | null;

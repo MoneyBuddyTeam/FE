@@ -1,9 +1,13 @@
 import { http } from 'msw';
 import { MOCK_USER, validateToken, createResponse } from './constants';
+import { API_ENDPOINTS } from '../../../config/api';
 
 export const withdrawHandlers = [
   // 비밀번호 확인 API
-  http.post('/api/v1/auth/verify-password-withdraw', async ({ request }) => {
+  http.post(API_ENDPOINTS.verifyPasswordWithdraw, async ({ request }) => {
+    console.log(
+      '🎯 MSW: withdrawHandlers - verify-password-withdraw 핸들러 호출됨',
+    );
     const authHeader = request.headers.get('Authorization');
 
     // 인증 토큰 검사
@@ -15,8 +19,9 @@ export const withdrawHandlers = [
     try {
       const { password } = (await request.json()) as { password: string };
       console.log('🔐 MSW: verify-password-withdraw 비밀번호 확인 중', {
-        입력된_비밀번호: '***',
-        실제_비밀번호: '***',
+        입력된_비밀번호: password, // 디버깅을 위해 실제 비밀번호 표시
+        실제_비밀번호: MOCK_USER.password,
+        일치_여부: password === MOCK_USER.password,
       });
 
       if (password === MOCK_USER.password) {
@@ -48,8 +53,8 @@ export const withdrawHandlers = [
     }
   }),
 
-  // 회원탈퇴 API
-  http.delete('/api/v1/users/:id', async ({ params, request }) => {
+  // 회원탈퇴 API (명세서: DELETE /api/v1/users/withdraw)
+  http.delete(API_ENDPOINTS.withdraw, async ({ request }) => {
     const authHeader = request.headers.get('Authorization');
 
     // 인증 토큰 검사
@@ -59,8 +64,7 @@ export const withdrawHandlers = [
     }
 
     try {
-      const userId = params.id;
-      console.log('🚪 MSW 회원탈퇴 요청:', { userId });
+      console.log('🚪 MSW 회원탈퇴 요청');
 
       // 명세서에 따라 204 No Content 반환
       console.log('✅ MSW 회원탈퇴 성공');

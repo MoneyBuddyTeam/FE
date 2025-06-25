@@ -1,19 +1,5 @@
 import { http, HttpResponse } from 'msw';
-
-const mockUser = {
-  nickname: '테스트사용자',
-  email: 'test@example.com',
-  role: 'USER',
-  profile_image: '/jpg/experts/expert1.png',
-};
-
-// 토큰 유효성 검증 함수
-const validateToken = (authHeader: string | null): boolean => {
-  if (!authHeader || !authHeader.startsWith('Bearer ')) return false;
-  const token = authHeader.replace('Bearer ', '');
-  // 로그인 시 생성되는 토큰 패턴과 일치하는지 확인
-  return token.includes('mock_login_access_token_');
-};
+import { validateToken, MOCK_USER } from '../auth/constants';
 
 // 토큰에서 사용자 ID 추출
 const getUserIdFromToken = (): number => {
@@ -39,10 +25,10 @@ export const userInfoHandlers = [
 
     return HttpResponse.json({
       id: 1,
-      nickname: mockUser.nickname,
-      email: mockUser.email,
-      role: mockUser.role,
-      profile_image: mockUser.profile_image,
+      nickname: MOCK_USER.nickname,
+      email: MOCK_USER.email,
+      role: MOCK_USER.role,
+      profile_image: MOCK_USER.profile_image,
     });
   }),
 
@@ -104,8 +90,8 @@ export const userInfoHandlers = [
 
         console.log('✅ MSW: 비밀번호 변경 성공');
         return HttpResponse.json({
+          ...MOCK_USER,
           id: parseInt(params.id as string),
-          ...mockUser,
           message: '비밀번호가 성공적으로 변경되었습니다.',
         });
       }
@@ -118,16 +104,15 @@ export const userInfoHandlers = [
         );
       }
 
-      // mockUser 정보 업데이트
-      mockUser.nickname = data.nickname;
-      if (data.profile_image) {
-        mockUser.profile_image = data.profile_image;
-      }
-
-      return HttpResponse.json({
+      // 업데이트된 사용자 정보 생성
+      const updatedUser = {
+        ...MOCK_USER,
         id: parseInt(params.id as string),
-        ...mockUser,
-      });
+        nickname: data.nickname,
+        ...(data.profile_image && { profile_image: data.profile_image }),
+      };
+
+      return HttpResponse.json(updatedUser);
     } catch (error) {
       console.error('❌ MSW: 사용자 정보 업데이트 중 오류:', error);
       return HttpResponse.json(
@@ -193,5 +178,64 @@ export const userInfoHandlers = [
 
     console.log('✅ MSW: 탈퇴 계정 복구 성공');
     return HttpResponse.json(recoveredUser);
+  }),
+
+  // 프로필 이미지 업로드 (POST /api/v1/users/profile-image)
+  http.post('/api/v1/users/profile-image', async ({ request }) => {
+    const authHeader = request.headers.get('Authorization');
+
+    // 토큰 검증
+    if (!validateToken(authHeader)) {
+      console.log('❌ MSW: 인증되지 않은 사용자 - /users/profile-image');
+      return HttpResponse.json(
+        { message: '인증이 필요합니다.' },
+        { status: 401 },
+      );
+    }
+
+    try {
+      const formData = await request.formData();
+      const file = formData.get('file') as File;
+
+      if (!file) {
+        return HttpResponse.json(
+          { message: '이미지 파일이 필요합니다.' },
+          { status: 400 },
+        );
+      }
+
+      // 파일 크기 검증 (5MB 제한)
+      if (file.size > 5 * 1024 * 1024) {
+        return HttpResponse.json(
+          { message: '파일 크기는 5MB 이하여야 합니다.' },
+          { status: 400 },
+        );
+      }
+
+      // 파일 형식 검증
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      if (!allowedTypes.includes(file.type)) {
+        return HttpResponse.json(
+          { message: '지원하지 않는 파일 형식입니다. (JPEG, PNG만 허용)' },
+          { status: 400 },
+        );
+      }
+
+      // 가상의 이미지 URL 생성
+      const imageUrl = `https://cdn.moneybuddy.com/profiles/${Date.now()}_${file.name}`;
+
+      console.log('✅ MSW: 프로필 이미지 업로드 성공:', imageUrl);
+
+      return HttpResponse.json({
+        imageUrl: imageUrl,
+        message: '프로필 이미지가 성공적으로 업로드되었습니다.',
+      });
+    } catch (error) {
+      console.error('❌ MSW: 프로필 이미지 업로드 중 오류:', error);
+      return HttpResponse.json(
+        { message: '이미지 업로드에 실패했습니다.' },
+        { status: 500 },
+      );
+    }
   }),
 ];
