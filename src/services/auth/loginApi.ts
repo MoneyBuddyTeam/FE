@@ -7,10 +7,11 @@ import type {
   RefreshTokenResponse,
 } from '../../types/auth';
 
-// 일반 로그인
+// 일반 로그인 - 명세서: POST /api/v1/users/login
 export const loginApi = async (data: LoginRequest): Promise<LoginResponse> => {
   console.log('🔐 로그인 API 호출');
-  const response = await axiosInstance.post('/api/v1/auth/login', data);
+  const response = await axiosInstance.post('/api/v1/users/login', data);
+  console.log('✅ 로그인 API 응답 성공');
   return response.data;
 };
 

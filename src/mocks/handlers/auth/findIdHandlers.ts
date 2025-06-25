@@ -9,7 +9,7 @@ const MOCK_USER_DATA = {
 };
 
 export const findIdHandlers = [
-  http.post('/api/v1/auth/find-id', async ({ request }) => {
+  http.post('/api/v1/auth/find-email', async ({ request }) => {
     try {
       const body = (await request.json()) as FindIdRequest;
       console.log('🔍 아이디 찾기 요청:', body);

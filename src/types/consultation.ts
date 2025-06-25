@@ -58,3 +58,40 @@ export interface ChatMessage {
   replyTo?: number | null;
   sentAt?: string;
 }
+
+// 명세서 준수 - 상담 채팅방 관련 타입들
+export interface ConsultationRoom {
+  consultationRoomId: number;
+  topic: string;
+  opponentUserId: number;
+  opponentNickname: string;
+  opponentProfileImage: string;
+  lastMessage: string;
+  lastMessageAt: string;
+  isClosed: boolean;
+  unreadCount: number;
+}
+
+export interface ConsultationRoomDetail {
+  consultationRoomId: number;
+  topic: string;
+  opponentNickname: string;
+  opponentProfileImage: string;
+}
+
+export interface CreateConsultationRoomRequest {
+  consultantId: number;
+  topic: string;
+  durationMinutes: number;
+  amount: number;
+  paymentMethod: string;
+}
+
+export interface UpdateConsultationStatusRequest {
+  userId: number;
+  newStatus: 'REQUESTED' | 'SCHEDULED' | 'COMPLETED';
+}
+
+export interface ConsultationImageUploadResponse {
+  imageUrl: string;
+}

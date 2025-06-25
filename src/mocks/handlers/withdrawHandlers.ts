@@ -1,8 +1,8 @@
 import { http, HttpResponse } from 'msw';
 
 export const withdrawHandlers = [
-  // 비밀번호 확인 API
-  http.post('/api/v1/users/verify-password', async ({ request }) => {
+  // 탈퇴용 비밀번호 확인 API - 명세서: POST /api/v1/auth/verify-password-withdraw
+  http.post('/api/v1/auth/verify-password-withdraw', async ({ request }) => {
     try {
       const { password } = (await request.json()) as { password: string };
       const authHeader = request.headers.get('Authorization');

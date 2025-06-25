@@ -23,7 +23,7 @@ export default function SocialLoginButtons({
       console.log(`🔐 ${provider} 소셜 로그인 시작`);
 
       // 소셜 로그인 URL 가져오기
-      const loginUrl = getSocialLoginUrl(provider);
+      const loginUrl = await getSocialLoginUrl(provider);
 
       // 팝업 창 열기
       const popup = window.open(
@@ -58,7 +58,11 @@ export default function SocialLoginButtons({
               response.tokens?.refresh_token || response.refreshToken;
 
             // 인증 상태 저장
-            setAuth(response.user, accessToken, refreshToken);
+            if (response.user && accessToken && refreshToken) {
+              setAuth(response.user, accessToken, refreshToken);
+            } else {
+              throw new Error('사용자 정보 또는 토큰을 받아올 수 없습니다.');
+            }
 
             // 홈페이지로 이동
             navigate('/');

@@ -15,8 +15,8 @@ export const paymentHandlers = [
     });
   }),
 
-  // 결제 내역 조회 API
-  http.get('/api/v1/payments', () => {
+  // 결제 내역 조회 API - 명세서: GET /api/v1/payments/history
+  http.get('/api/v1/payments/history', () => {
     console.log('📋 결제 내역 조회 요청');
 
     return HttpResponse.json({
@@ -56,15 +56,19 @@ export const paymentHandlers = [
     });
   }),
 
-  // 결제 취소 API
-  http.delete('/api/v1/payments/:paymentId', ({ params }) => {
-    const { paymentId } = params;
-    console.log('❌ 결제 취소 요청:', paymentId);
+  // 결제 취소 API - 명세서: POST /api/v1/payments/{paymentId}/cancel
+  http.post(
+    '/api/v1/payments/:paymentId/cancel',
+    async ({ params, request }) => {
+      const { paymentId } = params;
+      const body = await request.json();
+      console.log('❌ 결제 취소 요청:', paymentId, body);
 
-    return HttpResponse.json({
-      message: '결제가 성공적으로 취소되었습니다.',
-      refund_amount: 50000,
-      refund_status: 'processing',
-    });
-  }),
+      return HttpResponse.json({
+        message: '결제가 성공적으로 취소되었습니다.',
+        refund_amount: 50000,
+        refund_status: 'processing',
+      });
+    },
+  ),
 ];

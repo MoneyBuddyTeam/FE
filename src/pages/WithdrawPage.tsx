@@ -1,6 +1,5 @@
 import { useState, useRef, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMutation } from '@tanstack/react-query';
 import PageWrapper from '../components/layout/PageWrapper';
 import PageHeader from '../components/layout/PageHeader';
 import PasswordInputSection from '../components/pages/Withdraw/PasswordInputSection';
@@ -8,7 +7,10 @@ import WithdrawReasonSection from '../components/pages/Withdraw/WithdrawReasonSe
 import WithdrawWarningSection from '../components/pages/Withdraw/WithdrawWarningSection';
 import WithdrawConfirmModal from '../components/pages/Withdraw/WithdrawConfirmModal';
 import WithdrawSuccessModal from '../components/pages/Withdraw/WithdrawSuccessModal';
-import { verifyPasswordForWithdraw, withdrawUser } from '../api/withdrawApi';
+import {
+  useVerifyPasswordForWithdraw,
+  useWithdrawUser,
+} from '../hooks/useWithdraw';
 import { useAuthStore } from '../stores/useAuthStore';
 import { withdrawStyles } from '../styles/withdraw.styles';
 
@@ -46,28 +48,39 @@ const ScrollContainer = ({
 export default function WithdrawPage() {
   const navigate = useNavigate();
   const clearAuth = useAuthStore(state => state.clearAuth);
+  const user = useAuthStore(state => state.user);
+  const accessToken = useAuthStore(state => state.accessToken);
+
+  console.log('🔍 WithdrawPage - 사용자 상태:', {
+    user,
+    hasToken: !!accessToken,
+  });
 
   const [step, setStep] = useState<WithdrawStep>('password');
   const [password, setPassword] = useState('');
   const [selectedReason, setSelectedReason] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [isPasswordVerified, setIsPasswordVerified] = useState(false); // 비밀번호 검증 성공 여부
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false); // 비밀번호 확인 mutation
-  const verifyPasswordMutation = useMutation({
-    mutationFn: verifyPasswordForWithdraw,
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  // 비밀번호 확인 hook
+  const verifyPasswordMutation = useVerifyPasswordForWithdraw({
     onSuccess: () => {
       setPasswordError('');
+      setIsPasswordVerified(true); // 비밀번호 검증 성공 표시
       setStep('reason');
     },
     onError: (error: any) => {
+      setIsPasswordVerified(false); // 비밀번호 검증 실패 표시
       setPasswordError(
         error.response?.data?.message || '비밀번호 확인에 실패했습니다.',
       );
     },
   });
-  // 회원탈퇴 mutation
-  const withdrawMutation = useMutation({
-    mutationFn: withdrawUser,
+
+  // 회원탈퇴 hook
+  const withdrawMutation = useWithdrawUser({
     onSuccess: () => {
       setShowConfirmModal(false);
       setShowSuccessModal(true);
@@ -80,7 +93,21 @@ export default function WithdrawPage() {
 
   const handlePasswordSubmit = () => {
     if (!password) return;
+
+    // 비밀번호 검증 전에 에러 상태 초기화
+    setPasswordError('');
+    setIsPasswordVerified(false);
+
     verifyPasswordMutation.mutate(password);
+  };
+
+  const handlePasswordChange = (newPassword: string) => {
+    setPassword(newPassword);
+    // 비밀번호가 변경되면 이전 검증 상태와 에러를 초기화
+    if (passwordError) {
+      setPasswordError('');
+    }
+    setIsPasswordVerified(false);
   };
 
   const handleReasonNext = () => {
@@ -98,7 +125,7 @@ export default function WithdrawPage() {
       return;
     }
 
-    withdrawMutation.mutate(user.id);
+    withdrawMutation.mutate();
   };
   const handleWithdrawComplete = () => {
     clearAuth();
@@ -129,7 +156,7 @@ export default function WithdrawPage() {
   const isStepValid = () => {
     switch (step) {
       case 'password':
-        return password.length > 0;
+        return password.length > 0 && !verifyPasswordMutation.isPending; // 비밀번호가 있고 요청 중이 아닐 때만
       case 'reason':
         return selectedReason.length > 0;
       case 'warning':
@@ -172,7 +199,7 @@ export default function WithdrawPage() {
         return (
           <PasswordInputSection
             password={password}
-            onPasswordChange={setPassword}
+            onPasswordChange={handlePasswordChange}
             error={passwordError}
             onForgotPassword={handleForgotPassword}
           />
