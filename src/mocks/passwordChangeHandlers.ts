@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw';
 
 export const passwordChangeHandlers = [
-  http.patch('/api/v1/users/change-password', async ({ request }) => {
+  http.put('/api/v1/users/password', async ({ request }) => {
     const { currentPassword } = (await request.json()) as {
       currentPassword: string;
       newPassword: string;

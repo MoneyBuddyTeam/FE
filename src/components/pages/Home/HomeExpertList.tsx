@@ -3,12 +3,19 @@ import { ChevronRight } from 'lucide-react';
 import ScrollContainer from 'react-indiana-drag-scroll';
 import RecommendExpertCard from './RecommendExpertCard';
 import { expertData } from '../../../data/expertData';
+import { useNavigate } from 'react-router-dom';
 import type { JSX } from 'react';
 
 export default function HomeExpertList(): JSX.Element {
+  const navigate = useNavigate();
+
   const recommendedExperts = expertData
     .sort((a, b) => b.rating - a.rating)
     .slice(0, 5);
+
+  const handleMoreClick = () => {
+    navigate('/experts-list');
+  };
 
   return (
     <div>
@@ -16,7 +23,10 @@ export default function HomeExpertList(): JSX.Element {
         <Text type="H2" className="font-semibold">
           머니버디 추천 엑스퍼트
         </Text>
-        <button className="flex items-center text-b3 text-[#777777]">
+        <button
+          onClick={handleMoreClick}
+          className="flex items-center text-b3 text-[#777777]"
+        >
           더보기
           <ChevronRight size={16} className="ml-[2px]" />
         </button>

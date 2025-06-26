@@ -148,9 +148,7 @@ export default function BookmarkedExpertsPage() {
   // 탭별 필터링
   const filteredExperts = useMemo(() => {
     if (activeTab === '소비') return allBookmarkedExperts;
-    return allBookmarkedExperts.filter(
-      (expert: Expert) => expert.field === activeTab,
-    );
+    return allBookmarkedExperts.filter(expert => expert.field === activeTab);
   }, [allBookmarkedExperts, activeTab]);
 
   if (isLoading) {

@@ -40,10 +40,11 @@ export const API_ENDPOINTS = {
   changePassword: '/api/v1/auth/change-password',
   verifyPassword: '/api/v1/auth/verify-password',
   verifyPasswordWithdraw: '/api/v1/auth/verify-password-withdraw',
-  findId: '/api/v1/auth/find-id',
-  requestResetPassword: '/api/v1/auth/request-reset-password',
-  verifyResetCode: '/api/v1/auth/verify-reset-code',
-  resetPassword: '/api/v1/auth/reset-password',
+  withdraw: '/api/v1/users/withdraw',
+  findId: '/api/v1/auth/find-email',
+  requestResetPassword: '/api/v1/auth/password-reset/request',
+  verifyResetCode: '/api/v1/auth/password-reset/verify',
+  resetPassword: '/api/v1/auth/password-reset/confirm',
 
   // 소셜 로그인
   kakaoLogin: '/api/v1/auth/kakao',
@@ -86,6 +87,16 @@ export const API_ENDPOINTS = {
   challengeParticipationDetail: (id: number) =>
     `/api/v1/challenge-participations/${id}`,
 
+  // 채팅 기능 (Chat)
+  chatRooms: '/api/v1/chat-rooms',
+  chatRoomDetail: (roomId: number) => `/api/v1/chat-rooms/${roomId}`,
+  chatRoomsByUser: (userId: number) => `/api/v1/users/${userId}/chat-rooms`,
+  chatRoomsByAdvisor: (advisorId: number) =>
+    `/api/v1/advisors/${advisorId}/chat-rooms`,
+  chatMessages: (roomId: number) => `/api/v1/chat-rooms/${roomId}/messages`,
+  markMessageAsRead: (messageId: number) =>
+    `/api/v1/messages/${messageId}/read`,
+
   // 미션 기능 (Mission)
   createMission: (participationId: number) =>
     `/api/v1/admin/challenge-participations/${participationId}/missions`,
@@ -123,10 +134,8 @@ export const API_ENDPOINTS = {
   webhookDetail: (id: number) => `/api/v1/admin/webhooks/${id}`,
 
   // 프로젝트 전용 기능
-  getMonthlyExperts: '/api/v1/experts/monthly',
   bookmarks: '/api/v1/bookmarks',
-  bookmarkToggle: (advisorId: number) =>
-    `/api/v1/bookmarks/toggle/${advisorId}`,
+  bookmarkToggle: '/api/v1/bookmarks/toggle',
   // MSW 환경용 북마크 API
   advisorBookmark: (advisorId: number) =>
     `/api/v1/advisors/${advisorId}/bookmark`,

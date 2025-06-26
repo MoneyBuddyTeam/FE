@@ -90,4 +90,26 @@ export const chatHandlers = [
 
     return HttpResponse.json({ success: true });
   }),
+
+  // ✅ 채팅방 상세 조회
+  http.get('/api/v1/chat-rooms/:id', ({ params }) => {
+    const roomId = Number(params.id);
+    return HttpResponse.json({
+      id: roomId,
+      advisorId: 1,
+      name: '모의 채팅방',
+    });
+  }),
+
+  // ✅ 전문가 상세 정보 조회
+  http.get('/api/v1/advisors/:id', ({ params }) => {
+    const advisorId = Number(params.id);
+
+    return HttpResponse.json({
+      id: advisorId,
+      name: '김소비', // 실명 또는 별명
+      profileImageUrl: 'https://via.placeholder.com/80',
+      bio: '재무 상담 전문가입니다.',
+    });
+  }),
 ];

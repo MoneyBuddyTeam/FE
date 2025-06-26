@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  processPaymentApi,
+  preparePaymentApi,
   getPaymentHistoryApi,
   getPaymentStatusApi,
   cancelPaymentApi,
@@ -11,7 +11,7 @@ export const useProcessPayment = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: processPaymentApi,
+    mutationFn: preparePaymentApi,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payments'] });
     },
@@ -32,7 +32,13 @@ export const useCancelPayment = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: cancelPaymentApi,
+    mutationFn: ({
+      paymentId,
+      reason,
+    }: {
+      paymentId: string;
+      reason: string;
+    }) => cancelPaymentApi(paymentId, reason),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payments'] });
     },

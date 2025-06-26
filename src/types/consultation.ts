@@ -37,7 +37,7 @@ export interface ConsultationMessage {
   senderId: number;
   senderNickname: string;
   message: string;
-  type: 'TEXT' | 'IMAGE' | 'SYSTEM';
+  type: 'TEXT' | 'IMAGE' | 'SYSTEM' | 'CHALLENGE_INVITE'; // ← 이 부분 추가
   imageUrl?: string | null;
   sentAt: string;
   isReadByReceiver: boolean;
@@ -46,14 +46,53 @@ export interface ConsultationMessage {
     senderNickname: string;
     message: string;
   };
+  challengeId?: number;
 }
 
 export interface ChatMessage {
-  chatRoomId: number;
+  consultationRoomId: number;
   senderId: number;
   senderNickname: string;
+  type: 'TEXT' | 'IMAGE';
   message: string;
-  type: string;
   imageUrl?: string;
-  sentAt: string;
+  replyTo?: number | null;
+  sentAt?: string;
+}
+
+// 명세서 준수 - 상담 채팅방 관련 타입들
+export interface ConsultationRoom {
+  consultationRoomId: number;
+  topic: string;
+  opponentUserId: number;
+  opponentNickname: string;
+  opponentProfileImage: string;
+  lastMessage: string;
+  lastMessageAt: string;
+  isClosed: boolean;
+  unreadCount: number;
+}
+
+export interface ConsultationRoomDetail {
+  consultationRoomId: number;
+  topic: string;
+  opponentNickname: string;
+  opponentProfileImage: string;
+}
+
+export interface CreateConsultationRoomRequest {
+  consultantId: number;
+  topic: string;
+  durationMinutes: number;
+  amount: number;
+  paymentMethod: string;
+}
+
+export interface UpdateConsultationStatusRequest {
+  userId: number;
+  newStatus: 'REQUESTED' | 'SCHEDULED' | 'COMPLETED';
+}
+
+export interface ConsultationImageUploadResponse {
+  imageUrl: string;
 }

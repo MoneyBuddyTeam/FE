@@ -35,12 +35,13 @@ axiosInstance.interceptors.request.use(
         params: config.params,
         headers: config.headers,
       });
-    }
-
-    // 인증 토큰 추가
+    } // 인증 토큰 추가
     const token = useAuthStore.getState().accessToken;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log('🔑 인증 토큰 추가:', token);
+    } else {
+      console.log('⚠️ 인증 토큰 없음');
     }
 
     // MSW 환경에서 baseURL 확인
