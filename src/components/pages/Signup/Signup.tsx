@@ -65,7 +65,7 @@ export default function SignupPage(): JSX.Element {
     return (
       isValidName(name) &&
       isValidPhone(phone) &&
-      isValidEmailId(email) &&
+      isValidEmailId(email, domain) &&
       domain.trim().length > 0 &&
       isValidPassword(password) &&
       isPasswordMatch(password, passwordCheck) &&
@@ -156,19 +156,34 @@ export default function SignupPage(): JSX.Element {
               onChange={e => {
                 const value = e.target.value;
                 setEmail(value);
-                setErrorForField(
-                  'email',
-                  isValidEmailId(value)
-                    ? ''
-                    : '이메일 형식이 올바르지 않습니다.',
-                );
+                if (domain) {
+                  setErrorForField(
+                    'email',
+                    isValidEmailId(value, domain)
+                      ? ''
+                      : '이메일 형식이 올바르지 않습니다.',
+                  );
+                }
               }}
               errorMessage={errors.email}
               placeholder="이메일을 입력해주세요."
             />
           </div>
           <div className="mt-[25px]">
-            <EmailDropdown selected={domain} onSelect={setDomain} />
+            <EmailDropdown
+              selected={domain}
+              onSelect={selected => {
+                setDomain(selected);
+                if (email) {
+                  setErrorForField(
+                    'email',
+                    isValidEmailId(email, selected)
+                      ? ''
+                      : '이메일 형식이 올바르지 않습니다.',
+                  );
+                }
+              }}
+            />
           </div>
         </div>
       )}

@@ -1,8 +1,8 @@
 export const EMAIL_REGEX = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 
-export const isValidEmailId = (emailId: string): boolean => {
-  const EMAIL_ID_REGEX = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-  return EMAIL_ID_REGEX.test(emailId);
+export const isValidEmailId = (id: string, domain: string): boolean => {
+  const EMAIL_REGEX = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+  return EMAIL_REGEX.test(`${id}@${domain}`);
 };
 
 export const isValidName = (name: string): boolean => {
