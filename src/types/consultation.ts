@@ -37,7 +37,7 @@ export interface ConsultationMessage {
   senderId: number;
   senderNickname: string;
   message: string;
-  type: 'TEXT' | 'IMAGE' | 'SYSTEM';
+  type: 'TEXT' | 'IMAGE' | 'SYSTEM' | 'CHALLENGE_INVITE'; // ← 이 부분 추가
   imageUrl?: string | null;
   sentAt: string;
   isReadByReceiver: boolean;
@@ -46,6 +46,7 @@ export interface ConsultationMessage {
     senderNickname: string;
     message: string;
   };
+  challengeId?: number;
 }
 
 export interface ChatMessage {
