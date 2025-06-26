@@ -1006,6 +1006,10 @@ export const advisorHandlers = [
           duration: 30,
           participants: 156,
           category: '소비',
+          items: [
+            { id: 1001, title: '오늘 지출 내역 정리하기', status: 'PENDING' },
+            { id: 1002, title: '불필요한 소비 항목 줄이기', status: 'DONE' },
+          ],
         },
         2: {
           id: 2,
@@ -1015,6 +1019,13 @@ export const advisorHandlers = [
           duration: 30,
           participants: 89,
           category: '저축',
+          items: [
+            { id: 1003, title: '저축 목표 금액 설정하기', status: 'DONE' },
+            { id: 1004, title: '불필요한 지출 파악하기', status: 'PENDING' },
+            { id: 1005, title: '저축용 계좌에 입금하기', status: 'PENDING' },
+            { id: 1006, title: '지출 내역 주간 점검', status: 'DONE' },
+            { id: 1013, title: '지출 내역 주간 점검2', status: 'REVIEW' },
+          ],
         },
         3: {
           id: 3,
@@ -1024,22 +1035,25 @@ export const advisorHandlers = [
           duration: 30,
           participants: 234,
           category: '투자',
+          items: [
+            { id: 1007, title: 'ETF와 펀드 차이 알아보기', status: 'PENDING' },
+            { id: 1008, title: 'PER, PBR 개념 공부', status: 'DONE' },
+            { id: 1009, title: '관심 종목 3개 선정', status: 'PENDING' },
+            { id: 1010, title: '경제 뉴스 3개 읽고 요약', status: 'DONE' },
+          ],
         },
       };
 
       const challenge = challenges[challengeId as keyof typeof challenges];
       if (!challenge) {
-        console.log(`❌ MSW: 챌린지를 찾을 수 없음 - ID: ${challengeId}`);
         return HttpResponse.json(
           { message: '챌린지를 찾을 수 없습니다.' },
           { status: 404 },
         );
       }
 
-      console.log(`✅ MSW: 챌린지 상세 조회 성공 - ${challenge.title}`);
       return HttpResponse.json(challenge);
     } catch (error) {
-      console.error('❌ MSW: 챌린지 상세 조회 실패', error);
       return HttpResponse.json(
         { message: '챌린지 정보를 불러오는데 실패했습니다.' },
         { status: 500 },
@@ -1147,7 +1161,7 @@ export const advisorHandlers = [
             consultationRoomId: roomId,
             senderId: 1,
             senderNickname: '머니버디맨',
-            message: '안녕하세요! 상담 잘 부탁드립니다.',
+            message: '안녕하세요!',
             type: 'TEXT',
             imageUrl: null,
             sentAt: '2025-01-25T10:00:00',
@@ -1157,10 +1171,11 @@ export const advisorHandlers = [
             consultationRoomId: roomId,
             senderId: 2,
             senderNickname: '박재현',
-            message: '네, 안녕하세요! 어떤 것이 궁금하신가요?',
-            type: 'TEXT',
-            imageUrl: null,
-            sentAt: '2025-01-25T10:01:00',
+            message: '챌린지에 참여해보세요!',
+            type: 'CHALLENGE_INVITE',
+            challengeId: 1,
+            sentAt: '2025-01-25T10:03:00',
+            isReadByReceiver: false,
           },
           {
             id: 3,

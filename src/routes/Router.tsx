@@ -40,6 +40,8 @@ import SelectSchedulePage from '../pages/Reservation/SelectSchedulePage';
 import SelectTimePage from '../pages/Reservation/SelectTimePage';
 import ConsultationRoomPage from '../pages/Chat/ConsultationRoomPage';
 import SearchResultPage from '../pages/Search/SearchResultPage';
+import ChallengeSubmitPage from '../pages/Challenge/ChallengeSubmitPage';
+import ChallengeSubmitSuccessPage from '../pages/Challenge/ChallengeSubmitSuccessPage';
 
 export default function Router() {
   return (
@@ -259,7 +261,7 @@ export default function Router() {
             <ChallengeStatusPage />
           </PrivateRoute>
         }
-      />{' '}
+      />
       <Route
         path="/challenge/:id"
         element={
@@ -267,7 +269,23 @@ export default function Router() {
             <ChallengeDetailPage />
           </PrivateRoute>
         }
-      />{' '}
+      />
+      <Route
+        path="/challenge/:challengeId/mission/:missionId/submit"
+        element={
+          <PrivateRoute>
+            <ChallengeSubmitPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/challenge/:id/submit-success"
+        element={
+          <PrivateRoute>
+            <ChallengeSubmitSuccessPage />
+          </PrivateRoute>
+        }
+      />
       <Route
         path="/withdraw"
         element={
