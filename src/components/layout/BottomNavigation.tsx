@@ -60,7 +60,7 @@ export default function BottomNavigation() {
           >
             {({ isActive }) => (
               <img
-                className="w-8"
+                className="w-6"
                 src={isActive ? item.activeIcon : item.icon}
                 alt={item.label}
               />
