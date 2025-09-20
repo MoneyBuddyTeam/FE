@@ -1,7 +1,7 @@
 export interface MonthlyExpert {
   id: number;
   rank: number;
-  name: string;
+  nickname: string;
   description: string;
   tags: string[];
   rating: number;

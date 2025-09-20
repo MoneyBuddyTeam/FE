@@ -11,7 +11,7 @@ const getMonthlyExpertsFromData = (): MonthlyExpert[] => {
     .map((expert, index) => ({
       id: expert.id,
       rank: index + 1,
-      name: expert.nickname,
+      nickname: expert.nickname,
       description: expert.description,
       tags: expert.hashtags,
       rating: expert.rating,
@@ -21,8 +21,8 @@ const getMonthlyExpertsFromData = (): MonthlyExpert[] => {
     }));
 };
 
+// 전문가 목록 조회 (GET /api/v1/advisors)
 export const advisorHandlers = [
-  // 전문가 목록 조회 (GET /api/v1/advisors)
   http.get(API_ENDPOINTS.advisors, ({ request }) => {
     try {
       const url = new URL(request.url);
@@ -40,12 +40,20 @@ export const advisorHandlers = [
 
       let filtered = [...expertData];
       console.log('📊 MSW: 초기 데이터 수', filtered.length);
-
       if (sort === 'monthly') {
         console.log('🎯 MSW: 월간 전문가 반환');
         const limit = Number(url.searchParams.get('limit')) || 5;
         const monthlyExperts = getMonthlyExpertsFromData().slice(0, limit);
-        return HttpResponse.json(monthlyExperts);
+
+        return HttpResponse.json({
+          content: monthlyExperts,
+          pageable: {
+            pageNumber: 0,
+            pageSize: limit,
+          },
+          totalPages: 1,
+          totalElements: monthlyExperts.length,
+        });
       }
 
       // 카테고리 필터링

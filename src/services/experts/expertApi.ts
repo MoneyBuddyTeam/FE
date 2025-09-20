@@ -22,34 +22,47 @@ interface ExpertResponse {
   totalElements: number;
 }
 
-// 월간 전문가 조회
+// 월간 전문가 조회 (명세서: GET /api/v1/advisors)
 export const getMonthlyExperts = async (
   page: number = 0,
   size: number = 5,
 ): Promise<ExpertResponse> => {
-  const response = await axiosInstance.get(API_ENDPOINTS.advisors, {
-    params: { sort: 'rating,desc', page, size },
-    // params: { sort: 'monthly', page, size },
+  const { data } = await axiosInstance.get(API_ENDPOINTS.advisors, {
+    params: { page, size, sort: 'rating,desc', is_online: true },
   });
 
-  // API 응답이 이미 ExpertResponse 형식인 경우 그대로 반환
-  if (response.data.content && response.data.pageable) {
-    return response.data;
-  }
+  const list = Array.isArray(data?.content)
+    ? data.content
+    : Array.isArray(data)
+      ? data
+      : (data?.advisors ?? []);
 
-  // API 응답이 배열인 경우 ExpertResponse 형식으로 변환
-  const experts = Array.isArray(response.data)
-    ? response.data
-    : response.data.advisors || [];
+  const content: MonthlyExpert[] = list
+    .slice(0, size)
+    .map((item: any, idx: number) => ({
+      id: Number(item.id),
+      rank: idx + 1,
+      name: item.name ?? item.nickname ?? '이름 미정',
+      description: item.description ?? item.bio ?? '',
+      tags: item.tags ?? item.categories ?? item.hashtags ?? [],
+      rating: Number(item.rating ?? 0),
+      reviewCount: Number(item.reviewCount ?? item.review_count ?? 0),
+      imgUrl:
+        item.imgUrl ??
+        item.profileImage ??
+        item.profile_image ??
+        '/images/avatar-placeholder.png',
+      isLiked: Boolean(item.isLiked ?? false),
+    }));
 
   return {
-    content: experts,
+    content,
     pageable: {
-      pageNumber: page,
-      pageSize: size,
+      pageNumber: data?.pageable?.pageNumber ?? page,
+      pageSize: data?.pageable?.pageSize ?? size,
     },
-    totalPages: Math.ceil(experts.length / size),
-    totalElements: experts.length,
+    totalPages: data?.totalPages ?? Math.ceil(content.length / size),
+    totalElements: data?.totalElements ?? content.length,
   };
 };
 

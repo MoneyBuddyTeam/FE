@@ -1,15 +1,13 @@
-import { Star } from 'lucide-react';
-import HeartIcon from '../../../assets/icons/common/heart.png';
-import HeartEmptyIcon from '../../../assets/icons/common/heartEmpty.png';
-import { useExpertStore } from '../../../stores/useExpertStore';
-import type { MonthlyExpert } from '../../../types/api/expert/expert';
-import type { JSX } from 'react';
+import { Heart, Star } from 'lucide-react';
+import { useEffect, useState, type JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useToggleBookmark } from '../../../hooks/useBookmarks';
 
 interface Expert {
   id: number;
-  name: string;
-  tags?: string[]; // tags를 optional로 변경
+  name?: string;
+  nickname?: string;
+  tags?: string[];
   description: string;
   profileImage: string;
   rank?: number;
@@ -20,7 +18,7 @@ interface Expert {
 }
 
 interface ExpertCardProps {
-  expert: MonthlyExpert | Expert;
+  expert: Expert;
   variant?: 'monthly' | 'search';
 }
 
@@ -32,7 +30,8 @@ export default function ExpertCard({
     id,
     rank,
     name,
-    tags = [], // 기본값 설정
+    nickname,
+    tags = [],
     description,
     rating = 0,
     reviewCount = 0,
@@ -40,8 +39,11 @@ export default function ExpertCard({
     isLiked = false,
   } = expert;
 
-  const toggleLike = useExpertStore(state => state.toggleLike);
   const navigate = useNavigate();
+  const toggleBookmarkMutation = useToggleBookmark();
+
+  const [liked, setLiked] = useState<boolean>(isLiked);
+  useEffect(() => setLiked(isLiked), [isLiked]);
 
   const rankColors: Record<number, string> = {
     1: 'bg-yellow-400',
@@ -49,18 +51,31 @@ export default function ExpertCard({
     3: 'bg-[#CD7F32]',
   };
   const rankColor = rankColors[rank ?? 0] ?? 'bg-gray-300';
+  const displayName = name ?? nickname ?? '엑스퍼트';
+
+  const handleHeartClick = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const prev = liked;
+    setLiked(!prev);
+    try {
+      await toggleBookmarkMutation.mutateAsync(id);
+    } catch (err) {
+      setLiked(prev);
+      console.error('북마크 토글 실패', err);
+    }
+  };
 
   return (
     <div
       onClick={() => navigate(`/experts/${id}`)}
-      className={`relative flex items-start p-3 border rounded-xl bg-white cursor-pointer ${
+      className={`relative flex items-start p-4 border rounded-xl bg-white cursor-pointer ${
         variant === 'search' ? 'h-auto' : 'h-[120px]'
       }`}
     >
       <div className="relative mr-3 mt-2 shrink-0">
         <img
           src={imgUrl}
-          alt={`${name}의 프로필`}
+          alt={`${displayName}의 프로필`}
           className="w-14 h-14 rounded-full object-cover"
         />
         {variant === 'monthly' && rank !== undefined && (
@@ -72,13 +87,18 @@ export default function ExpertCard({
         )}
       </div>
 
-      <div className="flex-1 pr-8 overflow-hidden">
-        <p className="text-b1 font-semibold truncate">{name}</p>
-        <div className="flex flex-wrap gap-[4px] text-xs text-gray-500 mb-1">
-          {tags.map(tag => (
-            <span key={tag}>#{tag}</span>
-          ))}
+      <div className="flex-1 pr-8 py-2 overflow-hidden">
+        <div className="flex gap-2">
+          <p className="text-b1 font-semibold truncate">{displayName}</p>
+          <div className="relative top-[6px] flex gap-1 text-xs text-gray-500 shrink-0 leading-none">
+            {(tags ?? []).slice(0, 2).map(tag => (
+              <span key={tag} className="leading-none">
+                #{tag}
+              </span>
+            ))}
+          </div>
         </div>
+
         <p className="text-sm text-gray-800 break-words line-clamp-2">
           {description}
         </p>
@@ -94,16 +114,20 @@ export default function ExpertCard({
 
       {variant === 'monthly' && (
         <button
-          onClick={e => {
-            e.stopPropagation();
-            toggleLike(id);
-          }}
-          className="absolute right-3 top-1/2 -translate-y-1/2"
+          type="button"
+          onClick={handleHeartClick}
+          disabled={toggleBookmarkMutation.isPending}
+          aria-pressed={liked}
+          aria-label={liked ? '북마크 해제' : '북마크'}
+          className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center"
         >
-          <img
-            src={isLiked ? HeartIcon : HeartEmptyIcon}
-            alt="하트 아이콘"
-            className="w-5 h-5"
+          <Heart
+            size={18}
+            className={
+              liked
+                ? 'text-red-500 fill-red-500'
+                : 'text-gray-300 fill-transparent'
+            }
           />
         </button>
       )}
