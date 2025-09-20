@@ -21,8 +21,8 @@ const getMonthlyExpertsFromData = (): MonthlyExpert[] => {
     }));
 };
 
+// 전문가 목록 조회 (GET /api/v1/advisors)
 export const advisorHandlers = [
-  // 전문가 목록 조회 (GET /api/v1/advisors)
   http.get(API_ENDPOINTS.advisors, ({ request }) => {
     try {
       const url = new URL(request.url);
@@ -45,7 +45,6 @@ export const advisorHandlers = [
         const limit = Number(url.searchParams.get('limit')) || 5;
         const monthlyExperts = getMonthlyExpertsFromData().slice(0, limit);
 
-        // 👉 content, pageable, totalPages, totalElements 포함해서 응답
         return HttpResponse.json({
           content: monthlyExperts,
           pageable: {
@@ -56,12 +55,6 @@ export const advisorHandlers = [
           totalElements: monthlyExperts.length,
         });
       }
-      // if (sort === 'monthly') {
-      //   console.log('🎯 MSW: 월간 전문가 반환');
-      //   const limit = Number(url.searchParams.get('limit')) || 5;
-      //   const monthlyExperts = getMonthlyExpertsFromData().slice(0, limit);
-      //   return HttpResponse.json(monthlyExperts);
-      // }
 
       // 카테고리 필터링
       if (category_id) {
