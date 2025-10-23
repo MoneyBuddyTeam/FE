@@ -7,6 +7,10 @@ import { cancelConsultationApi } from '../../services/consultation/consultationA
 import type { ConsultationHistory } from '../../types/consultation';
 import { expertData } from '../../data/expertData';
 import { paymentDetailStyles } from '../../styles/paymentdetail.styles';
+import { useReservationStore } from '../../stores/useReservationStore';
+import dayjs from 'dayjs';
+import { formatConsultationRange } from '../../utils';
+// import { formatDate } from '../../utils';
 
 // 스크롤 컨테이너 컴포넌트 추출
 const ScrollContainer = ({
@@ -42,9 +46,18 @@ export default function ConsultationDetailPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const consultationId = id ? parseInt(id) : 0;
+  const {
+    selectedDate,
+    consultMethod,
+    selectedTime,
+    content,
+    needExtend,
+    extendMinutes,
+  } = useReservationStore();
 
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   // 상담 목록 데이터와 동일한 로직 사용하여 상태 동기화
+
   const consultation = useMemo<ConsultationHistory | null>(() => {
     if (consultationId <= 0 || consultationId > expertData.length) return null;
 
@@ -153,6 +166,14 @@ export default function ConsultationDetailPage() {
     }
   }
 
+  const formatDates = (date: string) => {
+    return dayjs(date).format('YYYY년 M월 D일 dddd');
+  };
+  const METHOD_LABEL: Record<string, string> = {
+    call: '전화상담',
+    chat: '채팅상담',
+  };
+
   // 하단에 고정될 버튼 컴포넌트 - 취소 상태나 상담완료 상태일 때는 버튼 숨김
   const BottomButtons =
     !isCancelledStatus(consultation?.status || '') &&
@@ -234,7 +255,7 @@ export default function ConsultationDetailPage() {
                   <span
                     className={paymentDetailStyles.consultationSection.value}
                   >
-                    {consultation?.date || '2025년 1월 25일 월요일'}
+                    {selectedDate ? formatDates(selectedDate) : '날짜 미정'}
                   </span>
                 </div>
 
@@ -249,7 +270,13 @@ export default function ConsultationDetailPage() {
                   <span
                     className={paymentDetailStyles.consultationSection.value}
                   >
-                    {consultation?.time || '오전 10:00~오전 10:30'}
+                    {formatConsultationRange(
+                      selectedDate,
+                      selectedTime,
+                      needExtend ? extendMinutes : 15,
+                    ) ||
+                      consultation?.time ||
+                      '오전 10 : 00 ~ 오전 10 : 30'}
                   </span>
                 </div>
 
@@ -264,7 +291,7 @@ export default function ConsultationDetailPage() {
                   <span
                     className={paymentDetailStyles.consultationSection.value}
                   >
-                    {consultation?.type || '전화상담'}
+                    {consultMethod ? METHOD_LABEL[consultMethod] : '전화상담'}
                   </span>
                 </div>
 
@@ -314,7 +341,6 @@ export default function ConsultationDetailPage() {
                 </div>
               </div>
             </div>
-
             {/* 상담 고민 등록 - 취소 상태일 때 스타일 변경 */}
             <div
               className={`${
@@ -347,8 +373,7 @@ export default function ConsultationDetailPage() {
                       : '#000000',
                   }}
                 >
-                  {consultation?.consultationNotes ||
-                    '더미 텍스트 최근 경제 상황의 불확실성이 커지면서 자산 포트폴리오 재조정에 대한 고민이 많습니다. 현재 주식, 예금, 펀드 등으로 나뉘어 있는데, 인플레이션과 금리 변동에 대비하여 안정적인 수익을 창출할 수 있는 방법이 궁금합니다. 특히 은퇴 후를 위한 노후 자금 마련과 연금 설계는 어떻게 해야 할지 막막합니다. 또한, 예상치 못한 상황에 대비한 비상 자금 확보와 보험의 필요성에 대해서도 상담받고 싶습니다. 전체적인 재무 목표를 설정하고 효율적인 자산 관리 전략을 세우는 데 전문가의 도움이 절실합니다.'}
+                  {content}
                 </p>
               </div>
             </div>
