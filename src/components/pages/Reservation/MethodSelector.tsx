@@ -6,8 +6,8 @@ export default function MethodSelector(): JSX.Element {
   const { consultMethod, setConsultMethod } = useReservationStore();
 
   return (
-    <div className="my-6">
-      <div className="text-h3 my-4 mx-2">상담 방식 선택</div>
+    <div className="my-6 mx-4">
+      <div className="text-h3 my-4">상담 방식 선택</div>
       <div className="flex gap-2">
         <Button
           variant={consultMethod === 'chat' ? 'text' : 'text2'}
