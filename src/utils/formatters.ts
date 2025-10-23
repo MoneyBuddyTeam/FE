@@ -1,3 +1,5 @@
+import dayjs from 'dayjs';
+
 export function formatPhoneNumber(phoneNumber: string): string {
   // 숫자만 남기고 모두 제거
   const cleaned = phoneNumber.replace(/\D/g, '');
@@ -33,3 +35,18 @@ export const formatDate = (dateString: string): string => {
 export const truncateText = (text: string, maxLength: number): string => {
   return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
 };
+
+export function formatConsultationRange(
+  selectedDate: string | null,
+  selectedTime: string | null,
+  totalMinutes: number,
+): string {
+  if (!selectedDate || !selectedTime) return '';
+  const start = dayjs(`${selectedDate} ${selectedTime}`);
+  if (!start.isValid()) return '';
+
+  const end = start.add(totalMinutes, 'minute');
+  const fmt = (d: dayjs.Dayjs) => d.format('A hh : mm');
+
+  return `${fmt(start)} ~ ${fmt(end)}`;
+}
