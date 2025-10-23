@@ -21,7 +21,7 @@ export default function ConsultContentInput({
           maxLength={maxLength}
         ></textarea>
       </div>
-      <div className="absolute right-0 text-xs text-[#9C9C9C]">
+      <div className="absolute right-0 text-xs text-[#9C9C9C] mr-4">
         {value.length}/{maxLength}자
       </div>
     </div>

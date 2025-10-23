@@ -44,7 +44,14 @@ export const useReservationStore = create<ReservationState>(set => ({
     set(state => ({
       extendMinutes: Math.max(state.extendMinutes - 15, 15),
     })),
-  toggleNeedExtend: () => set(state => ({ needExtend: !state.needExtend })),
+  toggleNeedExtend: () =>
+    set(state => {
+      const next = !state.needExtend;
+      return {
+        needExtend: next,
+        extendMinutes: next ? Math.max(state.extendMinutes, 15) : 15,
+      };
+    }),
   setSelectedConcern: key => set({ selectedConcern: key }),
   setContent: value => set({ content: value }),
   setSelectedDate: date => set({ selectedDate: date }),

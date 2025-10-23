@@ -21,17 +21,19 @@ export default function ConcernSelectPage(): JSX.Element {
       <div className="text-h3 text-center my-6">
         현재 가지고 있는 고민을 선택해주세요.
       </div>
-      {concernOptions.map(option => (
-        <ConcernCard
-          key={option.key}
-          title={option.title}
-          description={option.description}
-          isSelected={selectedConcern === option.key}
-          onClick={() => setSelectedConcern(option.key)}
-        />
-      ))}
+      <div className="mx-6 lg:mx-2">
+        {concernOptions.map(option => (
+          <ConcernCard
+            key={option.key}
+            title={option.title}
+            description={option.description}
+            isSelected={selectedConcern === option.key}
+            onClick={() => setSelectedConcern(option.key)}
+          />
+        ))}
+      </div>
       <div className="fixed bottom-0 left-0 w-full p-4 mb-2 bg-white">
-        <div className="max-w-md mx-auto px-4">
+        <div className="flex items-center justify-center max-w-md mx-auto px-4">
           <Button
             variant={selectedConcern ? 'primary' : 'disabled'}
             onClick={() => {

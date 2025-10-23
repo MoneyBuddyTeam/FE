@@ -23,7 +23,7 @@ export default function BottomButtons({
   rightDisabled,
 }: BottomButtonsProps): JSX.Element {
   return (
-    <div className="fixed bottom-0 left-0 w-full bg-white p-4 mb-2 ">
+    <div className="fixed bottom-0 left-0 w-full bg-white px-4 py-3 my-2 ">
       <div className="w-full max-w-md mx-auto flex gap-2">
         <Button
           variant={leftDisabled ? 'disabled' : leftVariant}
