@@ -9,7 +9,7 @@ export default function Calendar(): JSX.Element {
 
   return (
     <div>
-      <div className="text-h3 my-4 mx-2">상담 일자 선택</div>
+      <div className="text-h3 my-4 mx-4">상담 일자 선택</div>
       <CalendarHeader
         thisYear={year}
         thisMonth={month}

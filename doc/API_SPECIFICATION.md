@@ -469,65 +469,146 @@ MoneyBuddy 프로젝트의 백엔드 API 문서입니다. 각 도메인별로 �
 
 ---
 
-## 챌린지 기능 (Challenge)
+---
 
-### 🏆 Challenge API 명세서
+# 🏆 챌린지 기능 (Challenge) API 명세서
 
-1.  **챌린지 생성 (ADMIN, ADVISOR)**
-    - URL: `POST /api/v1/challenges`
-    - 설명: 관리자가 새로운 챌린지를 생성합니다.
-    - 요청 예시
-      ```json
-      {
-        "title": "30일 소비 기록 챌린지",
-        "description": "매일 소비 내용을 기록하고 검토하는 습관 만들기"
-      }
-      ```
-    - 응답 예시
-      ```json
-      {
-        "id": 1,
-        "title": "30일 소비 기록 챌린지",
-        "description": "매일 소비 내용을 기록하고 검토하는 습관 만들기",
-        "createdAt": "2025-06-19T12:00:00"
-      }
-      ```
-2.  **챌린지 전체 조회**
-    - URL: `GET /api/v1/challenges`
-    - 설명: 시스템에 등록된 모든 챌린지를 조회합니다.
-    - 응답 예시
-      ```json
-      [
-        {
-          "id": 1,
-          "title": "30일 소비 기록 챌린지",
-          "description": "매일 소비 내용을 기록하고 검토하는 습관 만들기",
-          "createdAt": "2025-06-19T12:00:00"
-        }
-      ]
-      ```
-3.  **챌린지 상세 조회**
-    - URL: `GET /api/v1/challenges/{id}`
-    - 설명: 특정 챌린지의 상세 정보를 조회합니다.
-4.  **챌린지 참여 (USER)**
-    - URL: `POST /api/v1/challenges/{challengeId}/participate`
-    - 설명: 로그인한 사용자가 챌린지에 참여합니다.
-    - 응답 예시
-      ```json
-      {
-        "id": 101,
-        "userId": 3,
-        "challengeId": 1,
-        "challengeTitle": "30일 소비 기록 챌린지",
-        "participatedAt": "2025-06-19T13:00:00"
-      }
-      ```
-5.  **사용자 참여 내역 조회**
-    - URL: `GET /api/v1/users/{userId}/challenge-participations`
-    - 설명: 특정 사용자의 챌린지 참여 내역을 조회합니다.
-6.  **특정 참여 상세 조회**
-    - URL: `GET /api/v1/challenge-participations/{id}`
-    - 설명: 챌린지 참여 정보 단건을 조회합니다.
+## 챌린지 상태 정의
+
+챌린지 상태는 다음 네 가지로 정의합니다.
+`type ChallengeStatus = 'progress' | 'urgent' | 'completed' | 'expired';`
+
+- **`progress`**: 챌린지 진행 중 (기본 상태)
+- **`urgent`**: 마감 3일 전 (D-3부터 적용)
+- **`completed`**: 챌린지 완료
+- **`expired`**: 챌린지 기간 만료 (미션 미완료)
+
+### 상태 전이 및 조건
+
+챌린지 상태는 다음과 같은 흐름으로 전이됩니다.
+`[progress] → [urgent] → [completed/expired]`
+
+- **`progress` → `urgent`**: 마감 3일 전부터
+- **`urgent` → `completed`**: 모든 미션 완료 시
+- **`urgent` → `expired`**: 기간 만료 시 (미션 미완료)
+- **`progress` → `expired`**: 기간 만료 시 (미션 미완료)
+
+### 챌린지 상태 자동 업데이트
+
+다음 상황에서 챌린지 상태가 자동으로 업데이트됩니다.
+
+- **매일 자정**: 마감일 기준으로 `urgent` 상태로 전환됩니다.
+- **미션 완료 시**: `completed` 상태로 전환됩니다.
+- **기간 만료 시**: `expired` 상태로 전환됩니다.
+
+### API 응답 필수 정보
+
+챌린지 관련 API 응답 시 다음 정보가 필수로 포함되어야 합니다.
+
+- `status`: 챌린지 상태 (예: `progress`, `urgent`)
+- `progress`: 진행률 (예: `75%`)
+- `deadline`: 남은 기간 (예: `D-3`, `2025-12-31`)
+- `title`: 챌린지 제목
+- `mentorName`: 멘토 이름
+- `mentorImage`: 멘토 이미지 URL
+
+### UI 컴포넌트 스타일 (참고)
+
+챌린지 상태에 따른 UI 컴포넌트 스타일은 다음과 같습니다.
+
+- **진행중 (`progress`)**
+  - 배경: `rgba(100, 136, 255, 0.1)`
+  - 글자: `#6488FF`
+  - 텍스트: `"진행중"`
+- **긴급 (`urgent`)**
+  - 배경: `rgba(255, 116, 151, 0.1)`
+  - 글자: `#FF7497`
+  - 텍스트: `"종료 D-3"`
+- **완료 (`completed`)**
+  - 배경: `#6488FF`
+  - 글자: `#FFFFFF`
+  - 텍스트: `"챌린지 완료"`
+- **만료 (`expired`)**
+  - 배경: `#E9E9E9`
+  - 글자: `#777777`
+  - 텍스트: `"챌린지 종료"`
+
+---
+
+## 챌린지 API
+
+### 1\. 챌린지 생성 (ADMIN, ADVISOR)
+
+`POST /api/v1/challenges`
+
+- **설명**: 관리자가 새로운 챌린지를 생성합니다.
+- **요청 예시**:
+  ```json
+  {
+    "title": "30일 소비 기록 챌린지",
+    "description": "매일 소비 내용을 기록하고 검토하는 습관 만들기"
+  }
+  ```
+- **응답 예시**:
+  ```json
+  {
+    "id": 1,
+    "title": "30일 소비 기록 챌린지",
+    "description": "매일 소비 내용을 기록하고 검토하는 습관 만들기",
+    "createdAt": "2025-06-19T12:00:00"
+  }
+  ```
+
+### 2\. 챌린지 전체 조회
+
+`GET /api/v1/challenges`
+
+- **설명**: 시스템에 등록된 모든 챌린지를 조회합니다.
+- **응답 예시**:
+  ```json
+  [
+    {
+      "id": 1,
+      "title": "30일 소비 기록 챌린지",
+      "description": "매일 소비 내용을 기록하고 검토하는 습관 만들기",
+      "createdAt": "2025-06-19T12:00:00"
+    }
+  ]
+  ```
+
+### 3\. 챌린지 상세 조회
+
+`GET /api/v1/challenges/{id}`
+
+- **설명**: 특정 챌린지의 상세 정보를 조회합니다.
+
+### 4\. 챌린지 참여 (USER)
+
+`POST /api/v1/challenges/{challengeId}/participate`
+
+- **설명**: 로그인한 사용자가 챌린지에 참여합니다.
+- **응답 예시**:
+  ```json
+  {
+    "id": 101,
+    "userId": 3,
+    "challengeId": 1,
+    "challengeTitle": "30일 소비 기록 챌린지",
+    "participatedAt": "2025-06-19T13:00:00"
+  }
+  ```
+
+### 5\. 사용자 참여 내역 조회
+
+`GET /api/v1/users/{userId}/challenge-participations`
+
+- **설명**: 특정 사용자의 챌린지 참여 내역을 조회합니다.
+
+### 6\. 특정 참여 상세 조회
+
+`GET /api/v1/challenge-participations/{id}`
+
+- **설명**: 챌린지 참여 정보 단건을 조회합니다.
 
 ---
 
@@ -725,6 +806,184 @@ MoneyBuddy 프로젝트의 백엔드 API 문서입니다. 각 도메인별로 �
 4.  **Webhook 삭제 (ADMIN)**
     - URL: `DELETE /api/v1/admin/webhooks/{id}`
     - 설명: 특정 Webhook 설정을 삭제합니다.
+
+---
+
+Okay, here's the API specification in Markdown format, with all challenge-related sections completely removed.
+
+---
+
+# 🔑 인증 및 계정 관리 API
+
+## 1. 소셜 로그인
+
+소셜 로그인을 위한 인증 및 처리 API입니다.
+
+### 소셜 로그인 인증 URL 제공
+
+`GET /api/v1/auth/social/{provider}/url`
+
+- **설명**: 소셜 로그인 팝업창을 띄우기 위한 인증 URL을 제공해요.
+- **Path Parameters**:
+  - `provider`: `kakao`, `google`, `naver` 중 하나예요.
+
+### 소셜 로그인 콜백 처리
+
+`POST /api/v1/auth/social/{provider}/callback`
+
+- **설명**: 소셜 플랫폼에서 인증 완료 후 받은 코드로 로그인을 처리해요.
+
+### 카카오 로그인
+
+`POST /api/v1/auth/kakao`
+
+- **설명**: 카카오 로그인을 처리해요.
+
+### 구글 로그인
+
+`POST /api/v1/auth/google`
+
+- **설명**: 구글 로그인을 처리해요.
+
+### 네이버 로그인
+
+`POST /api/v1/auth/naver`
+
+- **설명**: 네이버 로그인을 처리해요.
+
+---
+
+## 2. 회원가입 상세 기능
+
+회원가입 과정에서 필요한 이메일/닉네임 중복 확인 및 이메일 인증 관련 API예요.
+
+### 이메일 중복 확인
+
+`GET /api/v1/auth/check-email`
+
+- **설명**: 회원가입 시 입력된 이메일의 중복 여부를 확인해요.
+
+### 닉네임 중복 확인
+
+`GET /api/v1/auth/check-nickname`
+
+- **설명**: 회원가입 시 입력된 닉네임의 중복 여부를 확인해요.
+
+### 인증번호 발송
+
+`POST /api/v1/auth/send-verification`
+
+- **설명**: 이메일 인증을 위한 인증번호를 발송해요.
+
+### 인증번호 확인
+
+`POST /api/v1/auth/verify-code`
+
+- **설명**: 발송된 인증번호가 유효한지 확인해요.
+
+---
+
+## 3. 비밀번호 관련 상세 기능
+
+사용자의 비밀번호 변경, 재설정 및 아이디 찾기 기능을 제공해요.
+
+### 비밀번호 변경 (로그인 상태)
+
+`PUT /api/v1/users/password`
+
+- **설명**: 로그인 상태에서 현재 비밀번호를 확인하고 새로운 비밀번호로 변경해요.
+
+### 비밀번호 재설정 요청
+
+`POST /api/v1/auth/password-reset/request`
+
+- **설명**: 비밀번호를 잊었을 경우 재설정을 위한 요청을 처리해요.
+
+### 재설정 인증번호 확인
+
+`POST /api/v1/auth/password-reset/verify`
+
+- **설명**: 비밀번호 재설정을 위해 발송된 인증번호를 확인해요.
+
+### 새 비밀번호 설정
+
+`POST /api/v1/auth/password-reset/confirm`
+
+- **설명**: 인증이 완료된 후 새로운 비밀번호로 설정해요.
+
+### 아이디 찾기
+
+`POST /api/v1/auth/find-email`
+
+- **설명**: 이름과 전화번호를 통해 가입된 이메일(아이디)을 찾아요.
+
+---
+
+## 4. 회원탈퇴 상세 기능
+
+회원 탈퇴를 위한 본인 인증 및 실제 탈퇴를 처리하는 API예요.
+
+### 탈퇴용 비밀번호 확인
+
+`POST /api/v1/auth/verify-password-withdraw`
+
+- **설명**: 회원 탈퇴 전 본인 확인을 위해 비밀번호를 검증해요.
+
+### 회원탈퇴 실행
+
+`DELETE /api/v1/users/withdraw`
+
+- **설명**: 사용자 계정을 탈퇴 처리해요.
+
+---
+
+# ⭐️ 기타 API
+
+## 북마크 시스템
+
+전문가 북마크 기능을 제공해요.
+
+### 북마크 토글
+
+`POST /api/v1/bookmarks/toggle`
+
+- **설명**: 특정 전문가를 북마크하거나 북마크를 해제해요.
+
+### 내 북마크 목록 조회
+
+`GET /api/v1/bookmarks`
+
+- **설명**: 현재 사용자가 북마크한 전문가 목록을 조회해요.
+
+---
+
+## 결제 시스템
+
+상담 예약 및 기타 서비스 결제와 관련된 기능을 제공해요.
+
+### 결제 준비
+
+`POST /api/v1/payments/prepare`
+
+- **설명**: 결제 진행 전 필요한 결제 정보를 생성하고 준비해요.
+
+### 결제 승인
+
+`POST /api/v1/payments/approve`
+
+- **설명**: PG사 결제 완료 후 최종 결제를 승인 처리해요.
+
+### 결제 내역 조회
+
+`GET /api/v1/payments/history`
+
+- **설명**: 사용자의 과거 결제 내역을 조회해요.
+
+### 결제 취소
+
+`POST /api/v1/payments/{paymentId}/cancel`
+
+- **설명**: 완료된 결제를 취소하고 환불을 처리해요.
 
 ---
 

@@ -90,7 +90,7 @@ export default function ConsultationHistoryPage() {
     navigate(`/consultation/detail/${consultation.id}`);
   };
   const handleChatClick = (consultation: ConsultationHistory) => {
-    navigate(`/consultation/chat/${consultation.id}`);
+    navigate(`/consultation/rooms/${consultation.id}`);
   };
 
   const handleCancelClick = (consultation: ConsultationHistory) => {

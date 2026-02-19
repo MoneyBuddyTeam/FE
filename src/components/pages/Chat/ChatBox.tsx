@@ -23,7 +23,7 @@ export default function ChatBox({
   roomId,
   myId,
 }: {
-  roomId: string;
+  roomId: number;
   myId: number;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -37,7 +37,7 @@ export default function ChatBox({
   const { data, fetchNextPage, hasNextPage } = useChatMessages(roomId);
 
   const flatMessages = useMemo(() => {
-    return data?.pages.flatMap(page => page.content).reverse() || [];
+    return data?.pages.flatMap(page => page.messages).reverse() || [];
   }, [data]);
 
   useEffect(() => {
@@ -56,11 +56,11 @@ export default function ChatBox({
         .reverse()
         .find(m => m.senderId !== myId);
       if (lastReceived) {
-        markAsReadMutate({ roomId, messageId: lastReceived.messageId });
+        markAsReadMutate({ messageId: lastReceived.messageId });
         setHasMarkedAsRead(true);
       }
     }
-  }, [messages, hasMarkedAsRead, markAsReadMutate, roomId, myId]);
+  }, [messages, hasMarkedAsRead, markAsReadMutate, myId]);
 
   const handleScroll = () => {
     const el = containerRef.current;

@@ -28,12 +28,17 @@ export default function LoginForm() {
       const { autoLogin, ...loginData } = data;
       const response = await loginApi(loginData);
 
-      // MSW 응답 구조에 따라 토큰 추출
-      const accessToken = response.tokens?.access_token || response.accessToken;
-      const refreshToken =
-        response.tokens?.refresh_token || response.refreshToken;
+      // 명세서에 따른 Map 형식 응답 처리
+      const accessToken = response.token;
+      const userInfo = {
+        id: response.userId || Date.now(), // 응답의 userId 사용, 없으면 임시 생성
+        email: response.email,
+        nickname: response.nickname,
+        role: 'USER' as const,
+        profile_image: '/jpg/experts/expert1.png',
+      };
 
-      setAuth(response.user, accessToken, refreshToken);
+      setAuth(userInfo, accessToken, '');
       navigate('/');
     } catch (err: unknown) {
       if (

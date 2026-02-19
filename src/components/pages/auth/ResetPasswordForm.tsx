@@ -2,9 +2,9 @@
 import { useForm } from 'react-hook-form';
 import Input from '../../common/Input';
 import Button from '../../common/Button';
-import { resetPasswordApi } from '../../../services/auth/resetPasswordApi';
+import { useResetPassword } from '../../../hooks/useResetPassword';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { authStyles } from '../../../styles/auth.styles';
 import Text from '../../common/Text';
 import PageWrapper from '../../layout/PageWrapper';
@@ -19,14 +19,18 @@ export default function ResetPasswordForm() {
   const token = params.get('token') || '';
   const navigate = useNavigate();
   const [isSuccess, setIsSuccess] = useState(false);
+  const resetPasswordMutation = useResetPassword();
+
   const {
     register,
     handleSubmit,
     watch,
+    getValues,
     formState: { errors },
     trigger,
+    clearErrors,
   } = useForm<{ newPassword: string; confirmPassword: string }>({
-    mode: 'onChange',
+    mode: 'onTouched',
     defaultValues: {
       newPassword: '',
       confirmPassword: '',
@@ -36,30 +40,46 @@ export default function ResetPasswordForm() {
   const newPassword = watch('newPassword');
   const confirmPassword = watch('confirmPassword');
 
-  const handlePasswordChange = async (
-    e: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const value = e.target.value;
-    if (value && !PASSWORD_REGEX.test(value)) {
+  // 새 비밀번호가 변경될 때마다 확인 비밀번호 재검증
+  useEffect(() => {
+    if (confirmPassword && newPassword) {
+      // 약간의 지연을 두고 검증 실행
+      const timeoutId = setTimeout(() => {
+        trigger('confirmPassword');
+      }, 100);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [newPassword, trigger]);
+
+  // 비밀번호 패턴 검증을 위한 useEffect
+  useEffect(() => {
+    if (newPassword && !PASSWORD_REGEX.test(newPassword)) {
       setErrorMessage('특수문자, 영문, 숫자를 포함하여 8자 이상 입력해주세요');
     } else {
       setErrorMessage('');
     }
-    await trigger(['newPassword', 'confirmPassword']);
-  };
+  }, [newPassword]);
 
   const isFormValid =
     newPassword &&
     confirmPassword &&
     PASSWORD_REGEX.test(newPassword) &&
-    newPassword === confirmPassword;
+    newPassword === confirmPassword &&
+    !errors.newPassword &&
+    !errors.confirmPassword;
 
   const onSubmit = async (data: { newPassword: string }) => {
     try {
-      await resetPasswordApi({ token, newPassword: data.newPassword });
+      setErrorMessage('');
+      await resetPasswordMutation.mutateAsync({
+        token,
+        newPassword: data.newPassword,
+      });
       setIsSuccess(true);
     } catch (err: any) {
-      setErrorMessage('비밀번호 재설정에 실패했습니다.');
+      const errorMsg =
+        err?.response?.data?.message || '비밀번호 재설정에 실패했습니다.';
+      setErrorMessage(errorMsg);
     }
   };
 
@@ -140,7 +160,6 @@ export default function ResetPasswordForm() {
                   type="password"
                   hasToggle
                   placeholder="비밀번호를 입력해주세요"
-                  onChange={handlePasswordChange}
                   className="w-full"
                 />
                 {errorMessage && (
@@ -154,8 +173,18 @@ export default function ResetPasswordForm() {
                 <Input
                   {...register('confirmPassword', {
                     required: '비밀번호 확인을 입력해주세요',
-                    validate: value =>
-                      value === newPassword || '비밀번호가 일치하지 않습니다',
+                    validate: value => {
+                      const currentPassword = getValues('newPassword');
+                      console.log('🔍 검증 실행:', {
+                        currentPassword,
+                        confirmValue: value,
+                        match: value === currentPassword,
+                      });
+                      if (value !== currentPassword) {
+                        return '비밀번호가 일치하지 않습니다';
+                      }
+                      return true;
+                    },
                   })}
                   type="password"
                   hasToggle
@@ -172,10 +201,12 @@ export default function ResetPasswordForm() {
             <div className="mt-6">
               <Button
                 type="submit"
-                disabled={!isFormValid}
+                disabled={!isFormValid || resetPasswordMutation.isPending}
                 variant={!isFormValid ? 'disabled' : 'primary'}
               >
-                비밀번호 재설정
+                {resetPasswordMutation.isPending
+                  ? '재설정 중...'
+                  : '비밀번호 재설정'}
               </Button>
             </div>
           </form>

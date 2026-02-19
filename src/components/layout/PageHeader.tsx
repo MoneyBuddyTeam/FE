@@ -31,7 +31,7 @@ export default function PageHeader({
   };
 
   if (isLoginPage) {
-    return null; // 로그인 페이지에서는 헤더를 표시하지 않음
+    return null;
   }
 
   const isExpertTitle = title === '머니버디 엑스퍼트';

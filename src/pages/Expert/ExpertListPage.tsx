@@ -45,13 +45,28 @@ export default function ExpertListPage() {
     }
   }, []);
   // 실제 API 호출
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
-    useInfiniteExpertList({
-      category_id:
-        selectedTab === '전체' ? undefined : getCategoryId(selectedTab),
-      sort: getSortParam(selectedSort),
-      limit: 10,
-    });
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    error,
+  } = useInfiniteExpertList({
+    category_id:
+      selectedTab === '전체' ? undefined : getCategoryId(selectedTab),
+    sort: getSortParam(selectedSort),
+    limit: 10,
+  });
+
+  console.log('🎯 ExpertListPage 상태:', {
+    isLoading,
+    error,
+    dataPages: data?.pages?.length,
+    firstPageExperts: data?.pages[0]?.experts?.length,
+    hasNextPage,
+    isFetchingNextPage,
+  });
 
   const observerTarget = useRef<HTMLDivElement>(null);
 

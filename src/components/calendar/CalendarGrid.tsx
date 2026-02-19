@@ -31,7 +31,7 @@ export default function CalendarGrid({
   );
 
   return (
-    <div className="grid grid-cols-7 text-center text-b1 my-3 gap-y-2">
+    <div className="grid grid-cols-7 text-center text-b1 lg:text-lg my-3 gap-y-2 mx-2">
       {days.map(day => (
         <div key={day} className="font-semibold">
           {day}
@@ -49,7 +49,7 @@ export default function CalendarGrid({
         return (
           <div
             key={index}
-            className={`w-10 h-10 flex flex-col items-center justify-center rounded-xl
+            className={`w-10 h-10 lg:w-14 lg:h-14 flex flex-col items-center justify-center rounded-xl
     					${isPast ? 'text-[#9C9C9C] cursor-default' : 'cursor-pointer'}
     					${isSelected ? 'bg-[#6488FF] text-white' : ''}
     					${!isPast && !isSelected ? 'hover:bg-blue-100' : ''}
@@ -60,10 +60,10 @@ export default function CalendarGrid({
               }
             }}
           >
-            <span className="text-sm font-medium">{date}</span>
+            <span className="text-sm lg:text-base font-medium">{date}</span>
 
             {isToday && !isPast && (
-              <span className="text-[10px] font-medium leading-none mt-0.5">
+              <span className="text-[10px] lg:text-xs font-medium leading-none mt-0.5">
                 오늘
               </span>
             )}

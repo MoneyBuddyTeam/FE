@@ -105,7 +105,7 @@ export default function MyPage() {
   const handleConsultationDetailClick = () => navigate('/consultation/history');
   const handleConsultationActionClick = () => {
     if (nextConsultation) {
-      navigate(`/consultation/chat/${nextConsultation.id}`);
+      navigate(`/consultation/rooms/${nextConsultation.id}`);
     }
   };
   const handleChallengeClick = (challengeId?: number) => {

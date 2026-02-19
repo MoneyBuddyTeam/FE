@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import LightBulbIcon from '../../../assets/icons/common/lightbulbIcon.png';
+import QuizModal from './QuizModal';
 
 const QUIZ_QUESTION = 'GDP는 무엇의 약자일까요?';
 const QUIZ_OPTIONS = [
@@ -12,15 +13,19 @@ const CORRECT_ANSWER = '국내 총생산';
 
 export default function QuizCard() {
   const [selected, setSelected] = useState<string | null>(null);
-  const [result, setResult] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [isCorrect, setIsCorrect] = useState(false);
 
   const handleCheck = () => {
     if (!selected) return;
-    setResult(selected === CORRECT_ANSWER ? '정답입니다!' : '틀렸습니다!');
+
+    const correct = selected === CORRECT_ANSWER;
+    setIsCorrect(correct);
+    setShowModal(true);
   };
 
   return (
-    <div className="relative  my-14">
+    <div className="relative my-14">
       <div className="absolute -top-10 left-1/2 -translate-x-1/2">
         <img src={LightBulbIcon} alt="quiz icon" className="w-24 h-24" />
       </div>
@@ -35,32 +40,40 @@ export default function QuizCard() {
         </div>
 
         <div className="grid grid-cols-2 gap-2 mb-4">
-          {QUIZ_OPTIONS.map(option => (
-            <button
-              key={option}
-              className={`border rounded-md py-2 px-1 text-sm transition-all duration-150 ${
-                selected === option
-                  ? 'bg-white font-semibold border-[#5A67D8] text-[#5A67D8]'
-                  : 'bg-[#f4f6fa] text-gray-600  border-transparent'
-              }`}
-              onClick={() => setSelected(option)}
-            >
-              {option}
-            </button>
-          ))}
+          {QUIZ_OPTIONS.map(option => {
+            const isSelected = selected === option;
+            return (
+              <button
+                key={option}
+                className={`border rounded-md py-2 px-1 text-sm transition-all duration-150 ${
+                  isSelected
+                    ? 'bg-white text-[#5A67D8] font-semibold border-[#5A67D8]'
+                    : 'bg-white/15 text-white border-transparent'
+                }`}
+                onClick={() => setSelected(option)}
+              >
+                {option}
+              </button>
+            );
+          })}
         </div>
 
         <button
           onClick={handleCheck}
-          className="w-full py-2 rounded-md bg-white text-sm font-semibold text-black shadow-md border border-gray-200 hover:bg-gray-50"
+          className={`w-full py-2 rounded-md text-sm font-semibold shadow-md border transition-all duration-150
+            ${
+              selected
+                ? 'bg-white text-[#5A67D8] border-[#5A67D8]'
+                : 'bg-white/15 text-black border-gray-200 hover:bg-gray-50'
+            }`}
         >
           정답 확인하기
         </button>
-
-        {result && (
-          <div className="mt-3 text-sm font-semibold text-white">{result}</div>
-        )}
       </div>
+
+      {showModal && (
+        <QuizModal correct={isCorrect} onClose={() => setShowModal(false)} />
+      )}
     </div>
   );
 }

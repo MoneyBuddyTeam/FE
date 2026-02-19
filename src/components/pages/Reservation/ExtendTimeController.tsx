@@ -1,5 +1,7 @@
 import type { JSX } from 'react';
 import { useReservationStore } from '../../../stores/useReservationStore';
+import { Minus, Plus } from 'lucide-react';
+import Button from '../../common/Button';
 
 export default function ExtendTimeController(): JSX.Element {
   const {
@@ -13,7 +15,7 @@ export default function ExtendTimeController(): JSX.Element {
   const isDisabled = !needExtend;
 
   return (
-    <div className="mx-2">
+    <div className="mx-4 my-2">
       <div className="text-h3 my-2">상담 시간 연장</div>
 
       <p className="text-b3 text-[#777777] mb-4">
@@ -29,21 +31,23 @@ export default function ExtendTimeController(): JSX.Element {
         <span className="text-b2 text-black">연장 상담</span>
 
         <div className="flex items-center gap-2">
-          <button
-            className="w-7 h-7 border rounded text-sm disabled:opacity-30"
+          <Button
+            variant="text2"
+            className="border w-7 h-7 text-black flex justify-center items-center disabled:opacity-30"
             onClick={decreaseExtend}
             disabled={isDisabled || extendMinutes <= 15}
           >
-            –
-          </button>
+            <Minus size={14} />
+          </Button>
           <span className="text-b2">{extendMinutes} 분</span>
-          <button
-            className="w-7 h-7 border rounded text-sm disabled:opacity-30"
+          <Button
+            variant="text2"
+            className="border w-7 h-7 text-black flex justify-center items-center disabled:opacity-30"
             onClick={increaseExtend}
             disabled={isDisabled || extendMinutes >= 60}
           >
-            +
-          </button>
+            <Plus size={14} />
+          </Button>
         </div>
       </div>
 

@@ -85,10 +85,7 @@ export const verifyPassword = async (
   data: VerifyPasswordRequest,
 ): Promise<VerifyPasswordResponse> => {
   console.log('🔐 API 호출: 비밀번호 확인');
-  const response = await axiosInstance.post(
-    '/api/v1/auth/verify-password',
-    data,
-  );
+  const response = await axiosInstance.post(API_ENDPOINTS.verifyPassword, data);
   console.log('✅ API 응답: 비밀번호 확인 성공');
   return response.data;
 };

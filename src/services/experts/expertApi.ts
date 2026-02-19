@@ -12,10 +12,58 @@ import type {
   CreateChallengeResponse,
 } from '../../types/auth';
 
-// 월간 전문가 조회 (프로젝트 전용 - 명세서에 없음)
-export const getMonthlyExperts = async (): Promise<MonthlyExpert[]> => {
-  const response = await axiosInstance.get('/api/v1/experts/monthly');
-  return response.data;
+interface ExpertResponse {
+  content: MonthlyExpert[];
+  pageable: {
+    pageNumber: number;
+    pageSize: number;
+  };
+  totalPages: number;
+  totalElements: number;
+}
+
+// 월간 전문가 조회 (명세서: GET /api/v1/advisors)
+export const getMonthlyExperts = async (
+  page: number = 0,
+  size: number = 5,
+): Promise<ExpertResponse> => {
+  const { data } = await axiosInstance.get(API_ENDPOINTS.advisors, {
+    params: { page, size, sort: 'rating,desc', is_online: true },
+  });
+
+  const list = Array.isArray(data?.content)
+    ? data.content
+    : Array.isArray(data)
+      ? data
+      : (data?.advisors ?? []);
+
+  const content: MonthlyExpert[] = list
+    .slice(0, size)
+    .map((item: any, idx: number) => ({
+      id: Number(item.id),
+      rank: idx + 1,
+      name: item.name ?? item.nickname ?? '이름 미정',
+      description: item.description ?? item.bio ?? '',
+      tags: item.tags ?? item.categories ?? item.hashtags ?? [],
+      rating: Number(item.rating ?? 0),
+      reviewCount: Number(item.reviewCount ?? item.review_count ?? 0),
+      imgUrl:
+        item.imgUrl ??
+        item.profileImage ??
+        item.profile_image ??
+        '/images/avatar-placeholder.png',
+      isLiked: Boolean(item.isLiked ?? false),
+    }));
+
+  return {
+    content,
+    pageable: {
+      pageNumber: data?.pageable?.pageNumber ?? page,
+      pageSize: data?.pageable?.pageSize ?? size,
+    },
+    totalPages: data?.totalPages ?? Math.ceil(content.length / size),
+    totalElements: data?.totalElements ?? content.length,
+  };
 };
 
 // 전문가 목록 조회 (명세서: GET /api/v1/advisors)
@@ -24,14 +72,19 @@ export const getExperts = async (
 ): Promise<ExpertListResponse> => {
   console.log('🔍 API 호출: 전문가 목록 조회', params);
   const response = await axiosInstance.get(API_ENDPOINTS.advisors, { params });
-  console.log('✅ API 응답: 전문가 목록 조회 성공');
-  return {
-    experts: response.data.advisors || response.data.experts || [],
-    total: response.data.total || 0,
-    page: response.data.page || 1,
-    limit: response.data.limit || 10,
-    hasMore: response.data.hasMore || false,
+  console.log('✅ API 응답: 전문가 목록 조회 성공', response.data);
+
+  const result = {
+    experts: response.data.content || response.data.experts || [],
+    total: response.data.totalElements || response.data.total || 0,
+    page: response.data.pageable?.pageNumber || response.data.page || 1,
+    limit: response.data.pageable?.pageSize || response.data.limit || 10,
+    hasMore:
+      (response.data.pageable?.pageNumber || 0) < response.data.totalPages - 1,
   };
+
+  console.log('🔄 변환된 응답:', result);
+  return result;
 };
 
 // 전문가 상세 조회 (명세서: GET /api/v1/advisors/{advisorId})
@@ -65,7 +118,7 @@ export const toggleBookmark = async (
 }> => {
   console.log(`🔖 북마크 토글 API 호출 - 전문가 ID: ${expertId}`);
   const response = await axiosInstance.post(
-    API_ENDPOINTS.bookmarkToggle(expertId),
+    `${API_ENDPOINTS.bookmarks}/${expertId}/toggle`,
   );
   console.log(`✅ 북마크 토글 성공`);
   return response.data;
@@ -218,4 +271,50 @@ export const createChallengeAdmin = async (
   );
   console.log('✅ API 응답: 챌린지 생성 성공');
   return response.data;
+};
+
+// 사용자 ID로 전문가 조회 (명세서: GET /api/v1/advisors/user/{userId})
+export const getAdvisorByUserId = async (userId: number): Promise<Expert> => {
+  console.log(`🔍 API 호출: 사용자 ID로 전문가 조회 - 사용자 ID: ${userId}`);
+  const response = await axiosInstance.get(
+    API_ENDPOINTS.advisorByUserId(userId),
+  );
+  console.log('✅ API 응답: 사용자 ID로 전문가 조회 성공');
+  return response.data;
+};
+
+// 전문가 등록 여부 확인 (명세서: GET /api/v1/advisors/exists/user/{userId})
+export const checkAdvisorExists = async (userId: number): Promise<boolean> => {
+  console.log(`🔍 API 호출: 전문가 등록 여부 확인 - 사용자 ID: ${userId}`);
+  const response = await axiosInstance.get(API_ENDPOINTS.advisorExists(userId));
+  console.log('✅ API 응답: 전문가 등록 여부 확인 성공');
+  return response.data;
+};
+
+// 온라인 상태 업데이트 (명세서: PUT /api/v1/advisors/{advisorId}/online-status)
+export const updateAdvisorOnlineStatus = async (
+  advisorId: number,
+  isOnline: boolean,
+): Promise<void> => {
+  console.log(
+    `🔄 API 호출: 전문가 온라인 상태 업데이트 - ID: ${advisorId}, 온라인: ${isOnline}`,
+  );
+  await axiosInstance.put(API_ENDPOINTS.advisorOnlineStatus(advisorId), null, {
+    params: { isOnline },
+  });
+  console.log('✅ API 응답: 전문가 온라인 상태 업데이트 성공');
+};
+
+// 상담 가능 여부 업데이트 (명세서: PUT /api/v1/advisors/{advisorId}/availability)
+export const updateAdvisorAvailability = async (
+  advisorId: number,
+  available: boolean,
+): Promise<void> => {
+  console.log(
+    `🔄 API 호출: 전문가 상담 가능 여부 업데이트 - ID: ${advisorId}, 가능: ${available}`,
+  );
+  await axiosInstance.put(API_ENDPOINTS.advisorAvailability(advisorId), null, {
+    params: { available },
+  });
+  console.log('✅ API 응답: 전문가 상담 가능 여부 업데이트 성공');
 };

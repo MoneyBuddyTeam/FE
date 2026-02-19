@@ -2,12 +2,9 @@ import { axiosInstance } from '../services/api';
 
 // 비밀번호 확인 API
 export const verifyPasswordForWithdraw = async (password: string) => {
-  const response = await axiosInstance.post(
-    '/api/v1/auth/verify-password-withdraw',
-    {
-      password,
-    },
-  );
+  const response = await axiosInstance.post('/api/v1/users/verify-password', {
+    password,
+  });
   return response.data;
 };
 

@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw';
-import type { LoginRequest, LoginResponse } from '../../../types/auth';
+import type { LoginRequest } from '../../../types/auth';
 
 export const loginHandlers = [
   http.post('/api/v1/users/login', async ({ request }) => {
@@ -9,26 +9,31 @@ export const loginHandlers = [
       console.log('🔐 MSW 로그인 요청:', { email, password: '***' });
 
       if (email === 'test@example.com' && password === 'password123!') {
-        const response: LoginResponse = {
-          accessToken: 'mock_access_token_1_' + Date.now(),
-          refreshToken: 'mock_refresh_token_1_' + Date.now(),
-          user: {
-            id: 1,
-            email: 'test@example.com',
-            nickname: '사용자닉네임',
-            role: 'USER',
-            profile_image: '/jpg/experts/expert1.png',
-          },
-        };
+        const userId = 1;
+        const accessToken = 'mock_access_token_1_' + Date.now();
+        const refreshToken = 'mock_refresh_token_1_' + Date.now();
 
         console.log('✅ MSW 로그인 성공');
-        return HttpResponse.json({
-          user: response.user,
-          tokens: {
-            access_token: response.accessToken,
-            refresh_token: response.refreshToken,
+
+        // 명세서에 따른 Map 형식 응답 + httpOnly 쿠키
+        return new Response(
+          JSON.stringify({
+            token: accessToken,
+            email: 'test@example.com',
+            nickname: '사용자닉네임',
+            userId: userId, // 사용자 ID 추가
+          }),
+          {
+            status: 200,
+            headers: {
+              'Content-Type': 'application/json',
+              'Set-Cookie': [
+                `token=${accessToken}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=3600`,
+                `refresh_token=${refreshToken}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=86400`,
+              ].join(', '),
+            },
           },
-        });
+        );
       }
 
       console.log('❌ MSW 로그인 실패 - 잘못된 자격증명');

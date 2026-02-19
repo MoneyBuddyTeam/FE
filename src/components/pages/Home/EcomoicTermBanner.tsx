@@ -15,7 +15,7 @@ export default function EcomoicTermBanner(): JSX.Element {
         </div>
         <Button
           variant="text"
-          className="bg-[#C987F6] text-white text-sm rounded-full px-5 py-1"
+          className="bg-[#C987F6] border text-white text-sm rounded-full px-5 py-1"
         >
           학습하기
         </Button>

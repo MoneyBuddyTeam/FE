@@ -22,16 +22,26 @@ export interface ReservationResponse {
   paymentMethod: string;
 }
 
-// 예약 생성 API (명세서에 따라 상담 채팅방 생성으로 처리)
+// 예약 생성 API (상담 채팅방 생성으로 통합) - 명세서: POST /api/v1/consultation/rooms
 export const createReservationApi = async (
   reservationData: CreateReservationRequest,
 ) => {
-  console.log('📅 API 호출: 예약 생성 (상담 채팅방 생성)');
+  console.log('📅 API 호출: 예약 생성 (상담 채팅방 생성으로 통합)');
+
+  // 예약 데이터를 상담 채팅방 형식으로 변환
+  const consultationData = {
+    consultantId: reservationData.advisor_id,
+    topic: reservationData.title || '재무 상담',
+    durationMinutes: 30, // 기본 30분
+    amount: 50000, // 기본 금액
+    paymentMethod: 'CARD', // 기본 결제 방법
+  };
+
   const response = await axiosInstance.post(
-    API_ENDPOINTS.consultations,
-    reservationData,
+    API_ENDPOINTS.consultations, // /api/v1/consultation/rooms
+    consultationData,
   );
-  console.log('✅ API 응답: 예약 생성 성공');
+  console.log('✅ API 응답: 상담 채팅방 생성 성공');
   return response.data;
 };
 

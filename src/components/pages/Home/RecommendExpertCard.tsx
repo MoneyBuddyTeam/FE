@@ -1,12 +1,21 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 import type { Expert } from '../../../types';
 
 export default function RecommendExpertCard({ expert }: { expert: Expert }) {
   const [isLiked, setIsLiked] = useState(false);
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    navigate(`/experts/${expert.id}`);
+  };
 
   return (
-    <div className="w-[148px] flex-shrink-0 bg-white rounded-lg p-3 relative">
+    <div
+      onClick={handleCardClick}
+      className="w-[148px] flex-shrink-0 bg-white rounded-lg p-3 relative cursor-pointer"
+    >
       <div className="relative">
         <img
           src={expert.profile_image}
@@ -14,7 +23,10 @@ export default function RecommendExpertCard({ expert }: { expert: Expert }) {
           className="w-full h-[148px] rounded-lg object-cover"
         />
         <button
-          onClick={() => setIsLiked(!isLiked)}
+          onClick={e => {
+            e.stopPropagation();
+            setIsLiked(!isLiked);
+          }}
           className="absolute top-2 right-2"
         >
           <Heart

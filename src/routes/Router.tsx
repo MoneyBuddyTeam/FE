@@ -17,7 +17,7 @@ import SettingsPage from '../pages/SettingsPage';
 import PasswordChangePage from '../pages/PasswordChangePage';
 import ExpertListPage from '../pages/Expert/ExpertListPage';
 import ExpertDetailPage from '../pages/Expert/ExpertDetailPage';
-import SearchPage from '../pages/SearchPage';
+import SearchPage from '../pages/Search/SearchPage';
 import PaymentPage from '../pages/Payment/PaymentPage';
 import PaymentSuccessPage from '../pages/Payment/PaymentSuccessPage';
 import PaymentFailPage from '../pages/Payment/PaymentFailPage';
@@ -26,7 +26,6 @@ import ReservationListPage from '../pages/Reservation/ReservationListPage';
 import ReservationDetailPage from '../pages/Reservation/ReservationDetailPage';
 import ConsultationHistoryPage from '../pages/Consultation/ConsultationHistoryPage';
 import ConsultationDetailPage from '../pages/Consultation/ConsultationDetailPage';
-import ConsultationChatPage from '../pages/Consultation/ConsultationChatPage';
 import BookmarkedExpertsPage from '../pages/Bookmarks/BookmarkedExpertsPage';
 import ChallengeStatusPage from '../pages/Challenge/ChallengeStatusPage';
 import ChallengeDetailPage from '../pages/Challenge/ChallengeDetailPage';
@@ -40,6 +39,9 @@ import EnterConcernPage from '../pages/Reservation/EnterConcernPage';
 import SelectSchedulePage from '../pages/Reservation/SelectSchedulePage';
 import SelectTimePage from '../pages/Reservation/SelectTimePage';
 import ConsultationRoomPage from '../pages/Chat/ConsultationRoomPage';
+import SearchResultPage from '../pages/Search/SearchResultPage';
+import ChallengeSubmitPage from '../pages/Challenge/ChallengeSubmitPage';
+import ChallengeSubmitSuccessPage from '../pages/Challenge/ChallengeSubmitSuccessPage';
 
 export default function Router() {
   return (
@@ -173,6 +175,14 @@ export default function Router() {
         }
       />
       <Route
+        path="/search/result"
+        element={
+          <PrivateRoute>
+            <SearchResultPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
         path="/payment"
         element={
           <PrivateRoute>
@@ -251,7 +261,7 @@ export default function Router() {
             <ChallengeStatusPage />
           </PrivateRoute>
         }
-      />{' '}
+      />
       <Route
         path="/challenge/:id"
         element={
@@ -259,12 +269,20 @@ export default function Router() {
             <ChallengeDetailPage />
           </PrivateRoute>
         }
-      />{' '}
+      />
       <Route
-        path="/consultation/chat/:id"
+        path="/challenge/:challengeId/mission/:missionId/submit"
         element={
           <PrivateRoute>
-            <ConsultationChatPage />
+            <ChallengeSubmitPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/challenge/:id/submit-success"
+        element={
+          <PrivateRoute>
+            <ChallengeSubmitSuccessPage />
           </PrivateRoute>
         }
       />

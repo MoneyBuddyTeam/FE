@@ -16,10 +16,15 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  accessToken: string;
-  refreshToken: string;
-  user: User;
-  // MSW 모드용 토큰 구조 지원
+  // 명세서에 따른 Map 형식 응답
+  token: string;
+  email: string;
+  nickname: string;
+  userId?: number; // 사용자 ID 추가
+  // 기존 구조도 지원 (호환성)
+  accessToken?: string;
+  refreshToken?: string;
+  user?: User;
   tokens?: {
     access_token: string;
     refresh_token: string;
@@ -182,4 +187,23 @@ export interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
   isAuthenticated: boolean;
+}
+
+// 비밀번호 확인 타입 추가
+export interface VerifyPasswordRequest {
+  password: string;
+}
+
+export interface VerifyPasswordResponse {
+  verified: boolean;
+  message: string;
+}
+
+// 회원탈퇴 관련 타입 추가
+export interface WithdrawRequest {
+  password: string;
+}
+
+export interface WithdrawResponse {
+  message: string;
 }

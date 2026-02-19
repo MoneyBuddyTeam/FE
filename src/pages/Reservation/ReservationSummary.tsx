@@ -1,4 +1,4 @@
-import { Calendar } from 'lucide-react';
+import { CalendarCheck2 } from 'lucide-react';
 import type { JSX } from 'react';
 
 interface Props {
@@ -21,7 +21,7 @@ export default function ReservationSummary({
         borderImageSlice: 1,
       }}
     >
-      <Calendar size={16} />
+      <CalendarCheck2 size={16} />
       <div className="flex gap-2">
         <span className="text-b2 font-semibold">{consultationDate}</span>
         <span className="text-b2 font-semibold">{consultationTime}</span>

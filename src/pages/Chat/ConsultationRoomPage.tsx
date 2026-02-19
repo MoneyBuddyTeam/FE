@@ -6,26 +6,36 @@ import ChatHeader from '../../components/pages/Chat/ChatHeader';
 import ChatNotice from '../../components/pages/Chat/ChatNotice';
 import { connectStomp, disconnectStomp } from '../../utils/stompClient';
 import { useChatStore } from '../../stores/useChatStore';
-import { useSendTextMessage, useSendImageMessage } from '../../hooks/useChat';
 import type { ConsultationMessage } from '../../types';
 import ChatSearchBar from '../../components/pages/Chat/ChatSearchBar';
+import { sendChatMessage } from '../../services/chat/sendChatMessage';
+
+// (선택) 이미지 업로드 API 함수
+async function uploadImage(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append('image', file);
+  const res = await fetch('/api/v1/uploads', {
+    method: 'POST',
+    body: formData,
+  });
+  const data = await res.json();
+  return data.url; // 백엔드 응답에 맞게 조정
+}
 
 export default function ConsultationRoomPage() {
   const { roomId } = useParams<{ roomId: string }>();
+  const numericRoomId = Number(roomId);
   const senderId = Number(localStorage.getItem('userId'));
   const senderNickname = localStorage.getItem('nickname') || '알 수 없음';
 
   const { showSearchInput, addMessage, replyTarget, setReplyTarget } =
     useChatStore();
 
-  const sendTextMutation = useSendTextMessage();
-  const sendImageMutation = useSendImageMessage();
-
   useEffect(() => {
     if (!roomId) return;
 
     connectStomp({
-      roomId,
+      roomId: numericRoomId,
       token: '',
       onMessage: (msg: ConsultationMessage) => {
         addMessage(msg);
@@ -38,45 +48,30 @@ export default function ConsultationRoomPage() {
   const handleSend = async (text: string, imageFile?: File) => {
     if (!roomId) return;
 
-    if (imageFile) {
-      sendImageMutation.mutate({
-        roomId,
-        payload: {
-          senderId,
-          senderNickname,
-          content: text,
-          imageFile,
-          replyTo: replyTarget?.messageId,
-        },
-      });
-      setReplyTarget(null);
-      return;
-    }
-
-    sendTextMutation.mutate({
-      roomId,
-      payload: {
-        senderId,
-        senderNickname,
-        content: text,
-        replyTo: replyTarget?.messageId,
-      },
-    });
-
-    const localMessage: ConsultationMessage = {
-      consultationRoomId: Number(roomId),
+    const baseMessage = {
+      consultationRoomId: numericRoomId,
       senderId,
       senderNickname,
-      message: text,
-      type: 'TEXT',
-      imageUrl: null,
       sentAt: new Date().toISOString(),
-      isReadByReceiver: false,
-      messageId: Date.now(),
-      replyToMessage: replyTarget || undefined,
+      replyTo: replyTarget?.messageId ?? null,
     };
 
-    addMessage(localMessage);
+    if (imageFile) {
+      const imageUrl = await uploadImage(imageFile);
+      sendChatMessage({
+        ...baseMessage,
+        type: 'IMAGE',
+        message: text,
+        imageUrl,
+      });
+    } else {
+      sendChatMessage({
+        ...baseMessage,
+        type: 'TEXT',
+        message: text,
+      });
+    }
+
     setReplyTarget(null);
   };
 
@@ -86,9 +81,8 @@ export default function ConsultationRoomPage() {
       {showSearchInput && <ChatSearchBar />}
       <ChatNotice />
       <div className="flex-1 overflow-y-auto">
-        {roomId && <ChatBox roomId={roomId} myId={senderId} />}
+        {roomId && <ChatBox roomId={numericRoomId} myId={senderId} />}
       </div>
-
       <ChatInput onSend={handleSend} />
     </div>
   );
